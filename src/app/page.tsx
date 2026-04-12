@@ -78,7 +78,7 @@ export default function InvoiceScreen() {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       const response = await fetch('/api/invoices', {
         method: 'POST',
@@ -153,7 +153,6 @@ export default function InvoiceScreen() {
                     Dành cho khách hàng mua hàng trên gian hàng Shopee của LMC Tech Zone, cần xuất hoá đơn VAT.
                   </p>
                   <div className="flex items-start gap-2">
-                    <span className="material-symbols-outlined text-primary text-sm mt-1">circle</span>
                     <p>Quý khách vui lòng nhập thông tin dưới đây trước khi nhận hàng tối thiểu 24h.</p>
                   </div>
                   <div className="flex items-start gap-2 p-3 bg-error-container/30 rounded-lg border border-error-container/50">
@@ -197,9 +196,8 @@ export default function InvoiceScreen() {
                     Mã số thuế <span className="text-error">*</span>
                   </label>
                   <input
-                    className={`w-full h-12 px-4 bg-surface-container-lowest border-0 rounded-xl text-on-surface ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary/40 transition-all font-body ${
-                      isLookingUp ? "opacity-50 pointer-events-none" : ""
-                    }`}
+                    className={`w-full h-12 px-4 bg-surface-container-lowest border-0 rounded-xl text-on-surface ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary/40 transition-all font-body ${isLookingUp ? "opacity-50 pointer-events-none" : ""
+                      }`}
                     id="tax_id"
                     name="tax_id"
                     placeholder="01XXXXXXXX"
@@ -389,23 +387,20 @@ export default function InvoiceScreen() {
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
           <div
-            className={`flex items-center gap-3 px-6 py-4 rounded-xl border shadow-lg transform transition-all duration-300 ${
-              toast.type === "success"
+            className={`flex items-center gap-3 px-6 py-4 rounded-xl border shadow-lg transform transition-all duration-300 ${toast.type === "success"
                 ? "bg-[#f0fdf4] border-[#bbf7d0]"
                 : "bg-[#fef2f2] border-[#fecaca]"
-            }`}
+              }`}
           >
             <span
-              className={`material-symbols-outlined ${
-                toast.type === "success" ? "text-green-600" : "text-red-600"
-              }`}
+              className={`material-symbols-outlined ${toast.type === "success" ? "text-green-600" : "text-red-600"
+                }`}
             >
               {toast.type === "success" ? "check_circle" : "error"}
             </span>
             <p
-              className={`font-body font-medium ${
-                toast.type === "success" ? "text-green-800" : "text-red-800"
-              }`}
+              className={`font-body font-medium ${toast.type === "success" ? "text-green-800" : "text-red-800"
+                }`}
             >
               {toast.message}
             </p>
