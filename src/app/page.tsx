@@ -108,20 +108,10 @@ export default function InvoiceScreen() {
         <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
           <div className="flex items-center gap-3">
             <span className="text-2xl font-black text-[#034D9E] dark:text-[#4d90e0] tracking-tight font-headline">
-              Ledger
+              Invoice Manager
             </span>
           </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <a className="text-[#034D9E] font-bold border-b-2 border-[#034D9E] font-label text-sm uppercase tracking-wider" href="#">
-              Invoices
-            </a>
-            <a className="text-slate-500 dark:text-slate-400 hover:text-[#003774] dark:hover:text-white transition-colors font-label text-sm uppercase tracking-wider" href="#">
-              Clients
-            </a>
-            <a className="text-slate-500 dark:text-slate-400 hover:text-[#003774] dark:hover:text-white transition-colors font-label text-sm uppercase tracking-wider" href="#">
-              Reports
-            </a>
-          </nav>
+
           <div className="flex items-center gap-4">
             <span className="material-symbols-outlined text-slate-600 scale-95 active:duration-150 cursor-pointer">
               account_circle
@@ -370,8 +360,8 @@ export default function InvoiceScreen() {
       <footer className="mt-auto py-10 bg-surface-container-high/30">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
-            <span className="text-xl font-black text-[#034D9E]/60 tracking-tight font-headline">Ledger</span>
-            <span className="text-on-surface-variant/40 text-sm">© 2024 Corporate Ledger System.</span>
+            <span className="text-xl font-black text-[#034D9E]/60 tracking-tight font-headline">LMC Invoice Manager</span>
+            <span className="text-on-surface-variant/40 text-sm">© 2026 - LMC - SONBN </span>
           </div>
           <div className="flex gap-8">
             <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-label" href="#">
@@ -388,8 +378,8 @@ export default function InvoiceScreen() {
         <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
           <div
             className={`flex items-center gap-3 px-6 py-4 rounded-xl border shadow-lg transform transition-all duration-300 ${toast.type === "success"
-                ? "bg-[#f0fdf4] border-[#bbf7d0]"
-                : "bg-[#fef2f2] border-[#fecaca]"
+              ? "bg-[#f0fdf4] border-[#bbf7d0]"
+              : "bg-[#fef2f2] border-[#fecaca]"
               }`}
           >
             <span

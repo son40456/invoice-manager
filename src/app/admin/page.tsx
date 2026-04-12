@@ -25,7 +25,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchInvoices();
-    
+
     // Auto refresh every 10 seconds to feel live
     const interval = setInterval(fetchInvoices, 10000);
     return () => clearInterval(interval);
@@ -73,12 +73,12 @@ export default function AdminDashboard() {
   const filteredInvoices = invoices.filter(inv => {
     // Check status
     if (statusFilter !== "all" && inv.status !== statusFilter) return false;
-    
+
     // Check date range
     if (dateFrom || dateTo) {
       const invDate = new Date(inv.createdAt);
       invDate.setHours(0, 0, 0, 0); // Ignore time for correct date matching
-      
+
       if (dateFrom) {
         const from = new Date(dateFrom);
         from.setHours(0, 0, 0, 0);
@@ -99,7 +99,7 @@ export default function AdminDashboard() {
     try {
       // Import library dynamically
       const XLSX = await import('xlsx');
-      
+
       const headers = [
         "STT",
         "Thời gian",
@@ -126,7 +126,7 @@ export default function AdminDashboard() {
 
       const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
       const workbook = XLSX.utils.book_new();
-      
+
       // Setup beautiful column widths
       worksheet['!cols'] = [
         { wch: 5 },  // STT
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
           <div className="flex items-center gap-3">
             <span className="text-2xl font-black text-[#034D9E] dark:text-[#4d90e0] tracking-tight font-headline">
-              Ledger <span className="text-sm font-medium text-slate-500 uppercase tracking-widest pl-2 border-l-2 border-slate-300">Admin</span>
+              Invoice Manager <span className="text-sm font-medium text-slate-500 uppercase tracking-widest pl-2 border-l-2 border-slate-300">Admin</span>
             </span>
           </div>
           <div className="flex items-center gap-4 text-sm font-semibold text-primary">
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="hidden md:flex gap-3">
-            <button 
+            <button
               onClick={handleExportExcel}
               disabled={filteredInvoices.length === 0}
               className="flex items-center gap-2 px-5 py-2.5 bg-green-600 shadow-sm rounded-lg text-white font-bold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -187,7 +187,7 @@ export default function AdminDashboard() {
               <span className="material-symbols-outlined text-sm">download</span>
               Xuất Excel danh sách này
             </button>
-            <button 
+            <button
               onClick={fetchInvoices}
               className="flex items-center gap-2 px-5 py-2.5 bg-white border border-outline-variant/50 shadow-sm rounded-lg text-primary font-bold hover:bg-slate-50 transition-colors"
             >
@@ -201,38 +201,38 @@ export default function AdminDashboard() {
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-outline-variant/30 mb-6 flex flex-wrap gap-4 items-end">
           <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Lọc Trạng thái</label>
-            <select 
-              value={statusFilter} 
+            <select
+              value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
               className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
             >
               <option value="all">🌐 Tất cả trạng thái</option>
               <option value="pending">⏳ Đang chờ duyệt</option>
-              <option value="processed">✅ Đã xử lý (Xuất vé)</option>
+              <option value="processed">✅ Đã xử lý</option>
               <option value="rejected">❌ Bị từ chối</option>
             </select>
           </div>
           <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Từ ngày</label>
-            <input 
-              type="date" 
-              value={dateFrom} 
-              onChange={e => setDateFrom(e.target.value)} 
-              className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 font-medium" 
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={e => setDateFrom(e.target.value)}
+              className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 font-medium"
             />
           </div>
           <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đến ngày</label>
-            <input 
-              type="date" 
-              value={dateTo} 
-              onChange={e => setDateTo(e.target.value)} 
-              className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 font-medium" 
+            <input
+              type="date"
+              value={dateTo}
+              onChange={e => setDateTo(e.target.value)}
+              className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 font-medium"
             />
           </div>
           <div>
-            <button 
-              onClick={() => { setStatusFilter("all"); setDateFrom(""); setDateTo(""); }} 
+            <button
+              onClick={() => { setStatusFilter("all"); setDateFrom(""); setDateTo(""); }}
               className="h-[42px] px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-bold rounded-lg transition-colors flex items-center justify-center border border-slate-200"
             >
               Xóa bộ lọc
@@ -300,13 +300,12 @@ export default function AdminDashboard() {
                         <select
                           value={inv.status}
                           onChange={(e) => handleUpdateStatus(inv.id, e.target.value)}
-                          className={`font-bold outline-none cursor-pointer appearance-none rounded-full px-4 py-1.5 text-xs text-center border shadow-sm transition-all ${
-                            inv.status === 'processed' 
-                              ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200' 
-                              : inv.status === 'rejected'
+                          className={`font-bold outline-none cursor-pointer appearance-none rounded-full px-4 py-1.5 text-xs text-center border shadow-sm transition-all ${inv.status === 'processed'
+                            ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200'
+                            : inv.status === 'rejected'
                               ? 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200'
                               : 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200'
-                          }`}
+                            }`}
                         >
                           <option className="bg-white text-amber-700 font-bold" value="pending">⏳ Chờ duyệt</option>
                           <option className="bg-white text-green-700 font-bold" value="processed">✅ Đã xử lý</option>
