@@ -65,43 +65,61 @@ export default function AdminDashboard() {
     }).format(date);
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (invoices.length === 0) return;
 
-    const headers = [
-      "Thời gian",
-      "Mã đơn hàng",
-      "Công ty / Tổ chức",
-      "Địa chỉ",
-      "Mã số thuế",
-      "Email",
-      "Số điện thoại",
-      "Trạng thái"
-    ];
+    try {
+      // Import library dynamically
+      const XLSX = await import('xlsx');
+      
+      const headers = [
+        "STT",
+        "Thời gian",
+        "Mã đơn hàng",
+        "Tên Công ty / Tổ chức",
+        "Địa chỉ",
+        "Mã số thuế",
+        "Email",
+        "Số điện thoại",
+        "Trạng thái"
+      ];
 
-    const rows = invoices.map(inv => [
-      formatDate(inv.createdAt),
-      inv.order_id,
-      `"${inv.company_name.replace(/"/g, '""')}"`,
-      `"${inv.address.replace(/"/g, '""')}"`,
-      `"${inv.tax_id}"`,
-      inv.email,
-      `"${inv.phone}"`,
-      inv.status === 'processed' ? "Đã xử lý" : inv.status === 'rejected' ? "Từ chối" : "Chờ duyệt"
-    ]);
+      const rows = invoices.map((inv, idx) => [
+        idx + 1,
+        formatDate(inv.createdAt),
+        inv.order_id,
+        inv.company_name,
+        inv.address,
+        inv.tax_id,
+        inv.email,
+        inv.phone,
+        inv.status === 'processed' ? "Đã xử lý" : inv.status === 'rejected' ? "Từ chối" : "Chờ duyệt"
+      ]);
 
-    // Thêm BOM (\uFEFF) để Excel đọc đúng tiếng Việt có dấu
-    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      const workbook = XLSX.utils.book_new();
+      
+      // Setup beautiful column widths
+      worksheet['!cols'] = [
+        { wch: 5 },  // STT
+        { wch: 20 }, // Thời gian
+        { wch: 15 }, // Mã DH
+        { wch: 40 }, // Công ty
+        { wch: 50 }, // Địa chỉ
+        { wch: 15 }, // MST
+        { wch: 25 }, // Email
+        { wch: 15 }, // Phone
+        { wch: 15 }  // Status
+      ];
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    const dateStr = new Date().toISOString().split('T')[0];
-    link.setAttribute("download", `DanhSachYeuCauXuatHoaDon_${dateStr}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      XLSX.utils.book_append_sheet(workbook, worksheet, "YeuCauXuatHoaDon");
+
+      const dateStr = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(workbook, `DanhSachYeuCauXuatHoaDon_${dateStr}.xlsx`);
+    } catch (error) {
+      console.error("Export error:", error);
+      alert("Đang cài đặt thư viện Excel (xlsx). Quá trình này sẽ hoàn tất sau khi bạn Push code lên Vercel.");
+    }
   };
 
   return (
