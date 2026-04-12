@@ -18,6 +18,11 @@ export default function AdminDashboard() {
   const [invoices, setInvoices] = useState<InvoiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Filters State
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
   useEffect(() => {
     fetchInvoices();
     
@@ -65,8 +70,31 @@ export default function AdminDashboard() {
     }).format(date);
   };
 
+  const filteredInvoices = invoices.filter(inv => {
+    // Check status
+    if (statusFilter !== "all" && inv.status !== statusFilter) return false;
+    
+    // Check date range
+    if (dateFrom || dateTo) {
+      const invDate = new Date(inv.createdAt);
+      invDate.setHours(0, 0, 0, 0); // Ignore time for correct date matching
+      
+      if (dateFrom) {
+        const from = new Date(dateFrom);
+        from.setHours(0, 0, 0, 0);
+        if (invDate < from) return false;
+      }
+      if (dateTo) {
+        const to = new Date(dateTo);
+        to.setHours(0, 0, 0, 0);
+        if (invDate > to) return false;
+      }
+    }
+    return true;
+  });
+
   const handleExportExcel = async () => {
-    if (invoices.length === 0) return;
+    if (filteredInvoices.length === 0) return;
 
     try {
       // Import library dynamically
@@ -84,7 +112,7 @@ export default function AdminDashboard() {
         "Trạng thái"
       ];
 
-      const rows = invoices.map((inv, idx) => [
+      const rows = filteredInvoices.map((inv, idx) => [
         idx + 1,
         formatDate(inv.createdAt),
         inv.order_id,
@@ -153,11 +181,11 @@ export default function AdminDashboard() {
           <div className="hidden md:flex gap-3">
             <button 
               onClick={handleExportExcel}
-              disabled={invoices.length === 0}
+              disabled={filteredInvoices.length === 0}
               className="flex items-center gap-2 px-5 py-2.5 bg-green-600 shadow-sm rounded-lg text-white font-bold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-sm">download</span>
-              Xuất Excel
+              Xuất Excel danh sách này
             </button>
             <button 
               onClick={fetchInvoices}
@@ -165,6 +193,49 @@ export default function AdminDashboard() {
             >
               <span className="material-symbols-outlined text-sm">refresh</span>
               Làm mới
+            </button>
+          </div>
+        </div>
+
+        {/* Filters Section */}
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-outline-variant/30 mb-6 flex flex-wrap gap-4 items-end">
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Lọc Trạng thái</label>
+            <select 
+              value={statusFilter} 
+              onChange={e => setStatusFilter(e.target.value)}
+              className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+            >
+              <option value="all">🌐 Tất cả trạng thái</option>
+              <option value="pending">⏳ Đang chờ duyệt</option>
+              <option value="processed">✅ Đã xử lý (Xuất vé)</option>
+              <option value="rejected">❌ Bị từ chối</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Từ ngày</label>
+            <input 
+              type="date" 
+              value={dateFrom} 
+              onChange={e => setDateFrom(e.target.value)} 
+              className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 font-medium" 
+            />
+          </div>
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đến ngày</label>
+            <input 
+              type="date" 
+              value={dateTo} 
+              onChange={e => setDateTo(e.target.value)} 
+              className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 font-medium" 
+            />
+          </div>
+          <div>
+            <button 
+              onClick={() => { setStatusFilter("all"); setDateFrom(""); setDateTo(""); }} 
+              className="h-[42px] px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-bold rounded-lg transition-colors flex items-center justify-center border border-slate-200"
+            >
+              Xóa bộ lọc
             </button>
           </div>
         </div>
@@ -190,15 +261,15 @@ export default function AdminDashboard() {
                       <p>Đang tải dữ liệu...</p>
                     </td>
                   </tr>
-                ) : invoices.length === 0 ? (
+                ) : filteredInvoices.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                      <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">inbox</span>
-                      <p>Chưa có yêu cầu xuất hoá đơn nào.</p>
+                      <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">search_off</span>
+                      <p>Không tìm thấy hoá đơn nào khớp với bộ lọc.</p>
                     </td>
                   </tr>
                 ) : (
-                  invoices.map((inv) => (
+                  filteredInvoices.map((inv) => (
                     <tr key={inv.id} className={`hover:bg-blue-50/50 transition-colors group ${inv.status === 'processed' ? 'opacity-70 bg-slate-50/50' : inv.status === 'rejected' ? 'bg-red-50/30' : ''}`}>
                       <td className="px-6 py-4 text-slate-500 whitespace-nowrap">
                         {formatDate(inv.createdAt)}
