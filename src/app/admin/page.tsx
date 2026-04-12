@@ -65,6 +65,45 @@ export default function AdminDashboard() {
     }).format(date);
   };
 
+  const handleExportExcel = () => {
+    if (invoices.length === 0) return;
+
+    const headers = [
+      "Thời gian",
+      "Mã đơn hàng",
+      "Công ty / Tổ chức",
+      "Địa chỉ",
+      "Mã số thuế",
+      "Email",
+      "Số điện thoại",
+      "Trạng thái"
+    ];
+
+    const rows = invoices.map(inv => [
+      formatDate(inv.createdAt),
+      inv.order_id,
+      `"${inv.company_name.replace(/"/g, '""')}"`,
+      `"${inv.address.replace(/"/g, '""')}"`,
+      `"${inv.tax_id}"`,
+      inv.email,
+      `"${inv.phone}"`,
+      inv.status === 'processed' ? "Đã xử lý" : inv.status === 'rejected' ? "Từ chối" : "Chờ duyệt"
+    ]);
+
+    // Thêm BOM (\uFEFF) để Excel đọc đúng tiếng Việt có dấu
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.setAttribute("download", `DanhSachYeuCauXuatHoaDon_${dateStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
       <header className="fixed top-0 w-full z-50 bg-[#f9f9ff]/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm dark:shadow-none flex justify-between items-center px-6 py-4">
@@ -94,6 +133,14 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="hidden md:flex gap-3">
+            <button 
+              onClick={handleExportExcel}
+              disabled={invoices.length === 0}
+              className="flex items-center gap-2 px-5 py-2.5 bg-green-600 shadow-sm rounded-lg text-white font-bold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span className="material-symbols-outlined text-sm">download</span>
+              Xuất Excel
+            </button>
             <button 
               onClick={fetchInvoices}
               className="flex items-center gap-2 px-5 py-2.5 bg-white border border-outline-variant/50 shadow-sm rounded-lg text-primary font-bold hover:bg-slate-50 transition-colors"
