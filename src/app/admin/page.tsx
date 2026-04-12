@@ -40,6 +40,23 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleApprove = async (id: string) => {
+    try {
+      const res = await fetch("/api/invoices", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: "processed" }),
+      });
+      if (res.ok) {
+        setInvoices((prev) =>
+          prev.map((inv) => (inv.id === id ? { ...inv, status: "processed" } : inv))
+        );
+      }
+    } catch (err) {
+      console.error("Failed to approve invoice:", err);
+    }
+  };
+
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
     return new Intl.DateTimeFormat("vi-VN", {
@@ -118,19 +135,19 @@ export default function AdminDashboard() {
                   </tr>
                 ) : (
                   invoices.map((inv) => (
-                    <tr key={inv.id} className="hover:bg-blue-50/50 transition-colors group">
+                    <tr key={inv.id} className={`hover:bg-blue-50/50 transition-colors group ${inv.status === 'processed' ? 'opacity-70 bg-slate-50/50' : ''}`}>
                       <td className="px-6 py-4 text-slate-500 whitespace-nowrap">
                         {formatDate(inv.createdAt)}
                       </td>
-                      <td className="px-6 py-4 font-semibold text-primary">
+                      <td className="px-6 py-4 font-semibold text-primary whitespace-nowrap">
                         {inv.order_id}
                       </td>
-                      <td className="px-6 py-4 max-w-[200px] truncate" title={inv.company_name}>
-                        <div className="font-bold text-on-surface">{inv.company_name}</div>
-                        <div className="text-xs text-slate-500 truncate mt-0.5">{inv.address}</div>
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-on-surface whitespace-normal leading-tight">{inv.company_name}</div>
+                        <div className="text-xs text-slate-500 truncate mt-1">{inv.address}</div>
                       </td>
                       <td className="px-6 py-4 font-medium">
-                        <span className="bg-slate-100 px-2 py-1 rounded text-slate-600 border border-slate-200">
+                        <span className="bg-slate-100 px-2 py-1 rounded text-slate-600 border border-slate-200 whitespace-nowrap">
                           {inv.tax_id}
                         </span>
                       </td>
@@ -145,15 +162,28 @@ export default function AdminDashboard() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                          Chờ duyệt
-                        </span>
+                        {inv.status === 'processed' ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200 whitespace-nowrap">
+                            <span className="material-symbols-outlined text-[14px]">done</span>
+                            Đã xử lý
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 whitespace-nowrap">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            Chờ duyệt
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <button className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Đánh dấu đã xuất">
-                          <span className="material-symbols-outlined text-xl">check_circle</span>
-                        </button>
+                        {inv.status !== 'processed' && (
+                          <button 
+                            onClick={() => handleApprove(inv.id)}
+                            className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" 
+                            title="Đánh dấu đã xuất"
+                          >
+                            <span className="material-symbols-outlined text-xl">check_circle</span>
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))

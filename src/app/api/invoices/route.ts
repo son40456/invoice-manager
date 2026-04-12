@@ -30,3 +30,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to submit' }, { status: 500 });
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const { id, status } = await request.json();
+    const invoiceIndex = invoices.findIndex((inv) => inv.id === id);
+    
+    if (invoiceIndex === -1) {
+      return NextResponse.json({ success: false, error: 'Invoice not found' }, { status: 404 });
+    }
+
+    invoices[invoiceIndex].status = status;
+    return NextResponse.json({ success: true, data: invoices[invoiceIndex] });
+  } catch (error) {
+    console.error('Error updating invoice:', error);
+    return NextResponse.json({ success: false, error: 'Failed to update' }, { status: 500 });
+  }
+}
