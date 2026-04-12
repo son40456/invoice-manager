@@ -142,9 +142,9 @@ export default function AdminDashboard() {
                       <td className="px-6 py-4 font-semibold text-primary whitespace-nowrap">
                         {inv.order_id}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-on-surface whitespace-normal leading-tight">{inv.company_name}</div>
-                        <div className="text-xs text-slate-500 truncate mt-1">{inv.address}</div>
+                      <td className="px-6 py-4 min-w-[250px] max-w-[400px]">
+                        <div className="font-bold text-on-surface whitespace-normal break-words leading-tight">{inv.company_name}</div>
+                        <div className="text-xs text-slate-500 whitespace-normal break-words mt-1.5">{inv.address}</div>
                       </td>
                       <td className="px-6 py-4 font-medium">
                         <span className="bg-slate-100 px-2 py-1 rounded text-slate-600 border border-slate-200 whitespace-nowrap">
