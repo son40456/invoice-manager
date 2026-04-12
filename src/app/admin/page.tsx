@@ -115,20 +115,19 @@ export default function AdminDashboard() {
                   <th className="px-6 py-4 font-bold">Mã số thuế</th>
                   <th className="px-6 py-4 font-bold">Liên hệ</th>
                   <th className="px-6 py-4 font-bold text-center">Trạng thái</th>
-                  <th className="px-6 py-4 font-bold text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/20">
                 {loading && invoices.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                       <span className="material-symbols-outlined animate-spin text-3xl text-primary mb-2">progress_activity</span>
                       <p>Đang tải dữ liệu...</p>
                     </td>
                   </tr>
                 ) : invoices.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                       <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">inbox</span>
                       <p>Chưa có yêu cầu xuất hoá đơn nào.</p>
                     </td>
@@ -162,32 +161,20 @@ export default function AdminDashboard() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        {inv.status === 'processed' ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200 whitespace-nowrap">
-                            <span className="material-symbols-outlined text-[14px]">done</span>
-                            Đã xử lý
-                          </span>
-                        ) : inv.status === 'rejected' ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200 whitespace-nowrap">
-                            <span className="material-symbols-outlined text-[14px]">close</span>
-                            Từ chối
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 whitespace-nowrap">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                            Chờ duyệt
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-center">
                         <select
                           value={inv.status}
                           onChange={(e) => handleUpdateStatus(inv.id, e.target.value)}
-                          className="bg-surface-container-lowest border border-outline-variant/50 text-slate-600 text-xs rounded-lg focus:ring-primary/40 focus:border-primary block w-full p-2"
+                          className={`font-bold outline-none cursor-pointer appearance-none rounded-full px-4 py-1.5 text-xs text-center border shadow-sm transition-all ${
+                            inv.status === 'processed' 
+                              ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200' 
+                              : inv.status === 'rejected'
+                              ? 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200'
+                              : 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200'
+                          }`}
                         >
-                          <option value="pending">⏳ Chờ duyệt</option>
-                          <option value="processed">✅ Đã xử lý</option>
-                          <option value="rejected">❌ Từ chối</option>
+                          <option className="bg-white text-amber-700 font-bold" value="pending">⏳ Chờ duyệt</option>
+                          <option className="bg-white text-green-700 font-bold" value="processed">✅ Đã xử lý</option>
+                          <option className="bg-white text-red-700 font-bold" value="rejected">❌ Từ chối</option>
                         </select>
                       </td>
                     </tr>
