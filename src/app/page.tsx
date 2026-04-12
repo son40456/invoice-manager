@@ -78,12 +78,28 @@ export default function InvoiceScreen() {
     }
 
     setIsSubmitting(true);
-    // Artificial delay to simulate API
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
+    
+    try {
+      const response = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-    showToast("Đã gửi yêu cầu xuất hóa đơn thành công!", "success");
-    setFormData({ order_id: "", tax_id: "", company_name: "", address: "", email: "", phone: "" });
+      if (response.ok) {
+        showToast("Đã gửi yêu cầu xuất hóa đơn thành công!", "success");
+        setFormData({ order_id: "", tax_id: "", company_name: "", address: "", email: "", phone: "" });
+      } else {
+        showToast("Có lỗi xảy ra, vui lòng thử lại!", "error");
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      showToast("Lỗi kết nối máy chủ", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
