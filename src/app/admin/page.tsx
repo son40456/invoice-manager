@@ -40,20 +40,20 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleApprove = async (id: string) => {
+  const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {
       const res = await fetch("/api/invoices", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: "processed" }),
+        body: JSON.stringify({ id, status: newStatus }),
       });
       if (res.ok) {
         setInvoices((prev) =>
-          prev.map((inv) => (inv.id === id ? { ...inv, status: "processed" } : inv))
+          prev.map((inv) => (inv.id === id ? { ...inv, status: newStatus } : inv))
         );
       }
     } catch (err) {
-      console.error("Failed to approve invoice:", err);
+      console.error("Failed to update status:", err);
     }
   };
 
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
                   </tr>
                 ) : (
                   invoices.map((inv) => (
-                    <tr key={inv.id} className={`hover:bg-blue-50/50 transition-colors group ${inv.status === 'processed' ? 'opacity-70 bg-slate-50/50' : ''}`}>
+                    <tr key={inv.id} className={`hover:bg-blue-50/50 transition-colors group ${inv.status === 'processed' ? 'opacity-70 bg-slate-50/50' : inv.status === 'rejected' ? 'bg-red-50/30' : ''}`}>
                       <td className="px-6 py-4 text-slate-500 whitespace-nowrap">
                         {formatDate(inv.createdAt)}
                       </td>
@@ -167,6 +167,11 @@ export default function AdminDashboard() {
                             <span className="material-symbols-outlined text-[14px]">done</span>
                             Đã xử lý
                           </span>
+                        ) : inv.status === 'rejected' ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200 whitespace-nowrap">
+                            <span className="material-symbols-outlined text-[14px]">close</span>
+                            Từ chối
+                          </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 whitespace-nowrap">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
@@ -175,15 +180,15 @@ export default function AdminDashboard() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        {inv.status !== 'processed' && (
-                          <button 
-                            onClick={() => handleApprove(inv.id)}
-                            className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" 
-                            title="Đánh dấu đã xuất"
-                          >
-                            <span className="material-symbols-outlined text-xl">check_circle</span>
-                          </button>
-                        )}
+                        <select
+                          value={inv.status}
+                          onChange={(e) => handleUpdateStatus(inv.id, e.target.value)}
+                          className="bg-surface-container-lowest border border-outline-variant/50 text-slate-600 text-xs rounded-lg focus:ring-primary/40 focus:border-primary block w-full p-2"
+                        >
+                          <option value="pending">⏳ Chờ duyệt</option>
+                          <option value="processed">✅ Đã xử lý</option>
+                          <option value="rejected">❌ Từ chối</option>
+                        </select>
                       </td>
                     </tr>
                   ))
