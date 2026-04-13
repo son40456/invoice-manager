@@ -104,9 +104,9 @@ export default function AdminDashboard() {
         "STT",
         "Thời gian",
         "Mã đơn hàng",
+        "Mã số thuế",
         "Tên Công ty / Tổ chức",
         "Địa chỉ",
-        "Mã số thuế",
         "Email",
         "Số điện thoại",
         "Trạng thái"
@@ -116,9 +116,9 @@ export default function AdminDashboard() {
         idx + 1,
         formatDate(inv.createdAt),
         inv.order_id,
+        inv.tax_id,
         inv.company_name,
         inv.address,
-        inv.tax_id,
         inv.email,
         inv.phone,
         inv.status === 'processed' ? "Đã xử lý" : inv.status === 'rejected' ? "Từ chối" : "Chờ duyệt"
@@ -132,9 +132,9 @@ export default function AdminDashboard() {
         { wch: 5 },  // STT
         { wch: 20 }, // Thời gian
         { wch: 15 }, // Mã DH
+        { wch: 15 }, // MST
         { wch: 40 }, // Công ty
         { wch: 50 }, // Địa chỉ
-        { wch: 15 }, // MST
         { wch: 25 }, // Email
         { wch: 15 }, // Phone
         { wch: 15 }  // Status
@@ -247,8 +247,8 @@ export default function AdminDashboard() {
                 <tr>
                   <th className="px-6 py-4 font-bold">Thời gian</th>
                   <th className="px-6 py-4 font-bold">Mã đơn hàng</th>
-                  <th className="px-6 py-4 font-bold">Công ty / Tổ chức</th>
                   <th className="px-6 py-4 font-bold">Mã số thuế</th>
+                  <th className="px-6 py-4 font-bold">Công ty / Tổ chức</th>
                   <th className="px-6 py-4 font-bold">Liên hệ</th>
                   <th className="px-6 py-4 font-bold text-center">Trạng thái</th>
                 </tr>
@@ -277,14 +277,14 @@ export default function AdminDashboard() {
                       <td className="px-6 py-4 font-semibold text-primary whitespace-nowrap">
                         {inv.order_id}
                       </td>
-                      <td className="px-6 py-4 min-w-[250px] max-w-[400px]">
-                        <div className="font-bold text-on-surface whitespace-normal break-words leading-tight">{inv.company_name}</div>
-                        <div className="text-xs text-slate-500 whitespace-normal break-words mt-1.5">{inv.address}</div>
-                      </td>
                       <td className="px-6 py-4 font-medium">
                         <span className="bg-slate-100 px-2 py-1 rounded text-slate-600 border border-slate-200 whitespace-nowrap">
                           {inv.tax_id}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 min-w-[250px] max-w-[400px]">
+                        <div className="font-bold text-on-surface whitespace-normal break-words leading-tight">{inv.company_name}</div>
+                        <div className="text-xs text-slate-500 whitespace-normal break-words mt-1.5">{inv.address}</div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1">
