@@ -17,6 +17,24 @@ export default function InvoiceScreen() {
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [siteSettings, setSiteSettings] = useState({
+    guideTitle: "Hướng dẫn Yêu cầu hoá đơn",
+    guideContent: "Đang tải dữ liệu...",
+    supportTitle: "Hỗ trợ nhanh",
+    supportContent: "Đang tải dữ liệu..."
+  });
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setSiteSettings(data.data);
+        }
+      })
+      .catch(err => console.error("Error loading settings:", err));
+  }, []);
+
   useEffect(() => {
     if (toast) {
       const timer = setTimeout(() => setToast(null), 3000);
@@ -137,20 +155,9 @@ export default function InvoiceScreen() {
                 <span className="material-symbols-outlined text-white text-2xl">info</span>
               </div>
               <div>
-                <h2 className="font-headline font-bold text-xl text-primary mb-3">Hướng dẫn Yêu cầu hoá đơn</h2>
-                <div className="space-y-3 font-body text-on-surface-variant leading-relaxed">
-                  <p className="font-medium text-on-surface">
-                    Dành cho khách hàng mua hàng trên gian hàng Shopee của LMC Tech Zone, cần xuất hoá đơn VAT.
-                  </p>
-                  <div className="flex items-start gap-2">
-                    <p>Quý khách vui lòng nhập thông tin dưới đây trước khi nhận hàng tối thiểu 24h.</p>
-                  </div>
-                  <div className="flex items-start gap-2 p-3 bg-error-container/30 rounded-lg border border-error-container/50">
-                    <span className="material-symbols-outlined text-error text-lg">warning</span>
-                    <p className="text-sm">
-                      <span className="font-bold text-error">Lưu ý:</span> Hoá đơn phải được phát hành cùng ngày khách nhận hàng, nên những trường hợp muộn hơn, không đủ 24h trước khi nhận hàng LMC sẽ không xử lý.
-                    </p>
-                  </div>
+                <h2 className="font-headline font-bold text-xl text-primary mb-3">{siteSettings.guideTitle}</h2>
+                <div className="space-y-3 font-body text-on-surface-variant leading-relaxed whitespace-pre-line">
+                  {siteSettings.guideContent}
                 </div>
               </div>
             </div>
@@ -342,14 +349,10 @@ export default function InvoiceScreen() {
               <div className="bg-tertiary-container/10 p-6 rounded-xl border border-tertiary-container/20">
                 <div className="flex items-center gap-2 mb-2 text-tertiary-fixed-dim">
                   <span className="material-symbols-outlined">help_center</span>
-                  <span className="font-bold font-headline">Hỗ trợ nhanh</span>
+                  <span className="font-bold font-headline">{siteSettings.supportTitle}</span>
                 </div>
-                <p className="text-sm font-body text-on-surface-variant mb-4">
-                  Mọi thắc mắc về hoá đơn, vui lòng liên hệ hotline hỗ trợ khách hàng:
-                </p>
-                <div className="flex items-center gap-2 text-primary font-bold font-headline">
-                  <span className="material-symbols-outlined">support_agent</span>
-                  1900 1234
+                <div className="text-sm font-body text-on-surface-variant whitespace-pre-line leading-relaxed">
+                  {siteSettings.supportContent}
                 </div>
               </div>
             </div>

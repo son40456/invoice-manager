@@ -23,13 +23,57 @@ export default function AdminDashboard() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  useEffect(() => {
-    fetchInvoices();
+  // Tabs and Settings State
+  const [activeTab, setActiveTab] = useState("list");
+  const [siteSettings, setSiteSettings] = useState({
+    guideTitle: "",
+    guideContent: "",
+    supportTitle: "",
+    supportContent: ""
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
 
+  useEffect(() => {
+    // Auth Check
+    const isAuthed = localStorage.getItem("ledger_admin_auth");
+    if (!isAuthed) {
+      window.location.href = "/admin/login";
+      return;
+    }
+
+    fetchInvoices();
+    fetchSettings();
+    
     // Auto refresh every 10 seconds to feel live
     const interval = setInterval(fetchInvoices, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch("/api/settings");
+      const json = await res.json();
+      if (json.success) setSiteSettings(json.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(siteSettings),
+      });
+      if (res.ok) alert("Đã lưu cấu hình thành công!");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const fetchInvoices = async () => {
     try {
@@ -160,24 +204,97 @@ export default function AdminDashboard() {
             </span>
           </div>
           <div className="flex items-center gap-4 text-sm font-semibold text-primary">
-            Quản lý Phiếu Yêu Cầu
-            <span className="material-symbols-outlined text-slate-600 scale-95 cursor-pointer hover:bg-slate-200 p-2 rounded-full transition-all">
-              settings
-            </span>
+            <button 
+              onClick={() => setActiveTab('list')}
+              className={`px-3 py-1.5 rounded-lg transition-colors ${activeTab === 'list' ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-100'}`}
+            >
+              Danh sách Yêu cầu
+            </button>
+            <button 
+              onClick={() => setActiveTab('settings')}
+              className={`px-3 py-1.5 rounded-lg transition-colors ${activeTab === 'settings' ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-100'}`}
+            >
+              Cấu hình Trang chủ
+            </button>
+            <button 
+               onClick={() => {
+                 localStorage.removeItem("ledger_admin_auth");
+                 window.location.href = "/admin/login";
+               }}
+               className="text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+               title="Đăng xuất"
+            >
+              <span className="material-symbols-outlined text-[18px]">logout</span>
+            </button>
           </div>
         </div>
       </header>
 
       <main className="flex-grow pt-28 pb-20 px-4 md:px-8 max-w-7xl mx-auto min-h-screen">
-        <div className="flex justify-between items-end mb-8">
+        {activeTab === 'settings' ? (
           <div>
-            <h1 className="font-headline font-extrabold text-3xl md:text-4xl text-primary tracking-tight mb-2">
-              Danh sách Yêu cầu Xuất Hoá đơn
-            </h1>
-            <p className="text-on-surface-variant font-body text-sm md:text-base">
-              Theo dõi và xử lý các yêu cầu được gửi từ khách hàng. Dữ liệu sẽ tự động làm mới.
-            </p>
+            <div className="mb-8 flex justify-between items-end">
+              <div>
+                <h1 className="font-headline font-extrabold text-3xl md:text-4xl text-primary tracking-tight mb-2">
+                  Cấu hình Trang chủ
+                </h1>
+                <p className="text-on-surface-variant font-body text-sm md:text-base">
+                  Chỉnh sửa trực tiếp nội dung hiển thị ở các khối Hướng dẫn và Hỗ trợ trên Trang chủ.
+                </p>
+              </div>
+              <button 
+                onClick={handleSaveSettings}
+                disabled={savingSettings}
+                className="flex items-center gap-2 px-6 py-2.5 bg-primary shadow-sm rounded-lg text-white font-bold hover:bg-[#023b7a] transition-all disabled:opacity-50"
+              >
+                {savingSettings ? <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span> : <span className="material-symbols-outlined text-sm">save</span>}
+                Lưu cấu hình
+              </button>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Box 1: Guide */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col gap-4">
+                <div className="flex items-center gap-2 text-primary font-headline font-bold text-xl mb-2 pb-4 border-b border-outline-variant/30">
+                  <span className="material-symbols-outlined">menu_book</span> Khối: Hướng dẫn Yêu cầu
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Tiêu đề khối</label>
+                  <input type="text" value={siteSettings.guideTitle} onChange={(e) => setSiteSettings(p => ({...p, guideTitle: e.target.value}))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Nội dung (hỗ trợ tự động xuống dòng)</label>
+                  <textarea rows={5} value={siteSettings.guideContent} onChange={(e) => setSiteSettings(p => ({...p, guideContent: e.target.value}))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
+                </div>
+              </div>
+
+              {/* Box 2: Support */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col gap-4">
+                <div className="flex items-center gap-2 text-primary font-headline font-bold text-xl mb-2 pb-4 border-b border-outline-variant/30">
+                  <span className="material-symbols-outlined">support_agent</span> Khối: Hỗ trợ nhanh
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Tiêu đề khối</label>
+                  <input type="text" value={siteSettings.supportTitle} onChange={(e) => setSiteSettings(p => ({...p, supportTitle: e.target.value}))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Nội dung (hỗ trợ tự động xuống dòng)</label>
+                  <textarea rows={5} value={siteSettings.supportContent} onChange={(e) => setSiteSettings(p => ({...p, supportContent: e.target.value}))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
+                </div>
+              </div>
+            </div>
           </div>
+        ) : (
+          <div>
+            <div className="flex justify-between items-end mb-8">
+              <div>
+                <h1 className="font-headline font-extrabold text-3xl md:text-4xl text-primary tracking-tight mb-2">
+                  Danh sách Yêu cầu Xuất Hoá đơn
+                </h1>
+                <p className="text-on-surface-variant font-body text-sm md:text-base">
+                  Theo dõi và xử lý các yêu cầu được gửi từ khách hàng. Dữ liệu sẽ tự động làm mới.
+                </p>
+              </div>
           <div className="hidden md:flex gap-3">
             <button
               onClick={handleExportExcel}
@@ -319,6 +436,8 @@ export default function AdminDashboard() {
             </table>
           </div>
         </div>
+        </div>
+        )}
       </main>
     </>
   );
