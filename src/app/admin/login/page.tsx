@@ -14,7 +14,7 @@ export default function AdminLogin() {
     // Simulate API delay
     await new Promise(r => setTimeout(r, 600));
 
-    if (password === "admin123") {
+    if (password === "lmc@123") {
       localStorage.setItem("ledger_admin_auth", "true");
       window.location.href = "/admin"; // Native redirect
     } else {
@@ -36,7 +36,7 @@ export default function AdminLogin() {
             <span className="material-symbols-outlined text-3xl">admin_panel_settings</span>
           </div>
           <h1 className="text-2xl font-black text-[#034D9E] tracking-tight font-headline">
-            Ledger <span className="text-slate-500 uppercase font-medium tracking-widest pl-1 border-l-2 border-slate-300 ml-1">Admin</span>
+            LMC <span className="text-slate-500 uppercase font-medium tracking-widest pl-1 border-l-2 border-slate-300 ml-1">Admin</span>
           </h1>
           <p className="text-slate-500 text-sm mt-2 font-body">Vui lòng đăng nhập để truy cập Bảng quản trị.</p>
         </div>
@@ -79,7 +79,7 @@ export default function AdminLogin() {
         </form>
 
         <div className="mt-6 text-center text-xs text-slate-400">
-          Mật khẩu mặc định: <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">admin123</span>
+          Mật khẩu mặc định: <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">admin</span>
         </div>
       </div>
     </div>

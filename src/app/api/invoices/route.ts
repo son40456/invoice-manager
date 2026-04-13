@@ -1,49 +1,57 @@
 import { NextResponse } from 'next/server';
-
-// In-memory Array to store invoices temporarily.
-// Note: This data will be reset when the Next.js server restarts (e.g. Vercel cold boot).
-// For permanent storage, replace this with a real Database like Vercel Postgres, Prisma, or Supabase.
-let invoices: any[] = [];
-
-export async function GET() {
-  return NextResponse.json({ success: true, data: invoices });
-}
+import prisma from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     
-    // Add metadata
-    const newInvoice = {
-      id: Math.random().toString(36).substring(2, 10),
-      createdAt: new Date().toISOString(),
-      status: 'pending', // pending, processed, rejected
-      ...body
-    };
-
-    // Store in array (unshift to add to beginning)
-    invoices.unshift(newInvoice);
+    // Add to DB
+    const newInvoice = await prisma.invoiceRequest.create({
+      data: {
+        order_id: body.order_id,
+        tax_id: body.tax_id,
+        company_name: body.company_name,
+        address: body.address,
+        email: body.email,
+        phone: body.phone,
+      }
+    });
 
     return NextResponse.json({ success: true, data: newInvoice }, { status: 201 });
   } catch (error) {
-    console.error('Error saving invoice:', error);
-    return NextResponse.json({ success: false, error: 'Failed to submit' }, { status: 500 });
+    console.error('Error creating invoice:', error);
+    return NextResponse.json({ success: false, error: 'Failed to create invoice' }, { status: 500 });
+  }
+}
+
+export async function GET() {
+  try {
+    const invoices = await prisma.invoiceRequest.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    return NextResponse.json({ success: true, data: invoices });
+  } catch (error) {
+    console.error('Error fetching invoices:', error);
+    return NextResponse.json({ success: false, error: 'Failed to fetch invoices' }, { status: 500 });
   }
 }
 
 export async function PATCH(request: Request) {
   try {
     const { id, status } = await request.json();
-    const invoiceIndex = invoices.findIndex((inv) => inv.id === id);
     
-    if (invoiceIndex === -1) {
-      return NextResponse.json({ success: false, error: 'Invoice not found' }, { status: 404 });
+    if (!id || !status) {
+      return NextResponse.json({ success: false, error: 'Missing id or status' }, { status: 400 });
     }
 
-    invoices[invoiceIndex].status = status;
-    return NextResponse.json({ success: true, data: invoices[invoiceIndex] });
+    const updatedInvoice = await prisma.invoiceRequest.update({
+      where: { id },
+      data: { status }
+    });
+
+    return NextResponse.json({ success: true, data: updatedInvoice });
   } catch (error) {
     console.error('Error updating invoice:', error);
-    return NextResponse.json({ success: false, error: 'Failed to update' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Failed to update invoice status' }, { status: 500 });
   }
 }
