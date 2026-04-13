@@ -35,6 +35,33 @@ export default function AdminDashboard() {
   });
   const [savingSettings, setSavingSettings] = useState(false);
 
+  // Password Change State
+  const [passwordForm, setPasswordForm] = useState({ current: "", newPass: "" });
+  const [changingPass, setChangingPass] = useState(false);
+
+  const handleChangePassword = async () => {
+    if (!passwordForm.current || !passwordForm.newPass) return alert("Vui lòng điền đủ mật khẩu cũ và mới");
+    setChangingPass(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: passwordForm.current, newPassword: passwordForm.newPass })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+        setPasswordForm({ current: "", newPass: "" });
+      } else {
+        alert(data.error || "Có lỗi xảy ra");
+      }
+    } catch (err) {
+      alert("Lỗi kết nối máy chủ");
+    } finally {
+      setChangingPass(false);
+    }
+  };
+
   useEffect(() => {
     // Auth Check
     const isAuthed = localStorage.getItem("ledger_admin_auth");
@@ -291,6 +318,28 @@ export default function AdminDashboard() {
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">📷 Link URL ảnh Mã QR Zalo</label>
                   <input type="text" value={siteSettings.zaloGroupQrUrl || ""} onChange={(e) => setSiteSettings(p => ({...p, zaloGroupQrUrl: e.target.value}))} placeholder="https://...qr.png" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
                   <p className="text-xs text-slate-500 mt-2 italic">* Tải ảnh QR lên mạng (như Imgur.com) và copy dán Link ảnh vào đây để hiển thị mã QR.</p>
+                </div>
+              </div>
+
+              {/* Box 3: Security */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-red-200/50 flex flex-col gap-4 md:col-span-2 mt-4">
+                <div className="flex items-center gap-2 text-red-600 font-headline font-bold text-xl mb-2 pb-4 border-b border-red-100">
+                  <span className="material-symbols-outlined">security</span> Báo mật: Đổi Mật Khẩu Admin
+                </div>
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">Mật khẩu hiện tại</label>
+                    <input type="password" value={passwordForm.current} onChange={(e) => setPasswordForm(p => ({...p, current: e.target.value}))} placeholder="••••••" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400" />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">Mật khẩu mới</label>
+                    <input type="password" value={passwordForm.newPass} onChange={(e) => setPasswordForm(p => ({...p, newPass: e.target.value}))} placeholder="••••••" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400" />
+                  </div>
+                  <div className="flex items-end">
+                    <button onClick={handleChangePassword} disabled={changingPass} className="w-full md:w-auto px-6 py-3 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold hover:bg-red-600 hover:text-white transition-all disabled:opacity-50 h-[46px] mt-[26px]">
+                      {changingPass ? "Đang xử lý..." : "Đổi mật khẩu"}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

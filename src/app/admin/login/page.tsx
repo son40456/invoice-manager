@@ -10,17 +10,27 @@ export default function AdminLogin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(false);
 
-    // Simulate API delay
-    await new Promise(r => setTimeout(r, 600));
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
 
-    if (password === "lmc@123") {
-      localStorage.setItem("ledger_admin_auth", "true");
-      window.location.href = "/admin"; // Native redirect
-    } else {
+      if (data.success) {
+        localStorage.setItem("ledger_admin_auth", "true");
+        window.location.href = "/admin";
+      } else {
+        setError(true);
+        setTimeout(() => setError(false), 3000);
+      }
+    } catch (err) {
       setError(true);
+    } finally {
       setLoading(false);
-      setTimeout(() => setError(false), 3000);
     }
   };
 
