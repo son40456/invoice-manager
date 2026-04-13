@@ -13,9 +13,11 @@ async function upsertSetting(key: string, value: string) {
 // Default settings
 const DEFAULT_SETTINGS = {
   guideTitle: "Hướng dẫn Yêu cầu hoá đơn",
-  guideContent: "1. Điền chính xác Mã đơn hàng của bạn.\n2. Cung cấp Mã số thuế, hệ thống sẽ tự động tra cứu Tên Công ty/Tổ chức theo hệ thống Cổng thông tin Quốc gia.\n3. Điền Email thật để nhận Hoá đơn điện tử (định dạng PDF/XML).",
+  guideContent: "1. Điền chính xác Mã đơn hàng của bạn.\n2. Cung cấp Mã số thuế, hệ thống sẽ tự động tra cứu Tên Công ty/Tổ chức.\n3. Điền Email thật để nhận Hoá đơn điện tử.",
   supportTitle: "Hỗ trợ nhanh",
-  supportContent: "Hotline: 1900 xxxx (Bấm phím 1)\nZalo Hỗ trợ: 09xx xxx xxx\nEmail Kế toán: ketoan@company.com\n\nThời gian làm việc:\nSáng: 08:30 - 12:00\nChiều: 13:30 - 18:00 (Từ Thứ 2 - Thứ 6)."
+  supportContent: "Mọi thắc mắc kỹ thuật hay sai sót trong quá trình điền Form, bạn có thể liên hệ với chúng tôi để phân xử nhé.",
+  zaloGroupLink: "https://zalo.me/g/xxxxxxx",
+  zaloGroupQrUrl: "" // Empty by default
 };
 
 export async function GET() {

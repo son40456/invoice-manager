@@ -29,7 +29,9 @@ export default function AdminDashboard() {
     guideTitle: "",
     guideContent: "",
     supportTitle: "",
-    supportContent: ""
+    supportContent: "",
+    zaloGroupLink: "",
+    zaloGroupQrUrl: ""
   });
   const [savingSettings, setSavingSettings] = useState(false);
 
@@ -280,6 +282,15 @@ export default function AdminDashboard() {
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Nội dung (hỗ trợ tự động xuống dòng)</label>
                   <textarea rows={5} value={siteSettings.supportContent} onChange={(e) => setSiteSettings(p => ({...p, supportContent: e.target.value}))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
+                </div>
+                <div className="border-t border-slate-200 pt-4 mt-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">🔗 Link tham gia Nhóm Zalo Hỗ trợ</label>
+                  <input type="text" value={siteSettings.zaloGroupLink || ""} onChange={(e) => setSiteSettings(p => ({...p, zaloGroupLink: e.target.value}))} placeholder="https://zalo.me/g/..." className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">📷 Link URL ảnh Mã QR Zalo</label>
+                  <input type="text" value={siteSettings.zaloGroupQrUrl || ""} onChange={(e) => setSiteSettings(p => ({...p, zaloGroupQrUrl: e.target.value}))} placeholder="https://...qr.png" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                  <p className="text-xs text-slate-500 mt-2 italic">* Tải ảnh QR lên mạng (như Imgur.com) và copy dán Link ảnh vào đây để hiển thị mã QR.</p>
                 </div>
               </div>
             </div>
