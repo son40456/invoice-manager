@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     });
 
     // Bắn Email xác nhận ngầm (Không block trình duyệt của khách quá lâu)
-    sendConfirmationEmail(body.email, body.order_id, body.company_name).catch(console.error);
+    sendConfirmationEmail(newInvoice).catch(console.error);
 
     return NextResponse.json({ success: true, data: newInvoice }, { status: 201 });
   } catch (error) {
