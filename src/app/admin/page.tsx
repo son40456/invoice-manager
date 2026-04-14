@@ -135,6 +135,24 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteInvoice = async (id: string, orderId: string) => {
+    if (!confirm(`Bạn có chắc chắn muốn xóa yêu cầu hoá đơn \"${orderId}\" không?\nHành động này không thể hoàn tác.`)) return;
+    try {
+      const res = await fetch("/api/invoices", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+      });
+      if (res.ok) {
+        setInvoices((prev) => prev.filter((inv) => inv.id !== id));
+      } else {
+        alert("Xóa thất bại. Vui lòng thử lại.");
+      }
+    } catch (err) {
+      alert("Lỗi kết nối máy chủ");
+    }
+  };
+
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
     return new Intl.DateTimeFormat("vi-VN", {
@@ -428,6 +446,7 @@ export default function AdminDashboard() {
                   <th className="px-6 py-4 font-bold">Công ty / Tổ chức</th>
                   <th className="px-6 py-4 font-bold">Liên hệ</th>
                   <th className="px-6 py-4 font-bold text-center">Trạng thái</th>
+                  <th className="px-6 py-4 font-bold text-center">Xóa</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/20">
@@ -488,6 +507,15 @@ export default function AdminDashboard() {
                           <option className="bg-white text-green-700 font-bold" value="processed">✅ Đã xử lý</option>
                           <option className="bg-white text-red-700 font-bold" value="rejected">❌ Từ chối</option>
                         </select>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <button
+                          onClick={() => handleDeleteInvoice(inv.id, inv.order_id)}
+                          title="Xóa yêu cầu này"
+                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
                       </td>
                     </tr>
                   ))
