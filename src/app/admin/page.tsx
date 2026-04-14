@@ -39,6 +39,10 @@ export default function AdminDashboard() {
   const [passwordForm, setPasswordForm] = useState({ current: "", newPass: "" });
   const [changingPass, setChangingPass] = useState(false);
 
+  // Delete Confirmation Modal State
+  const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: string; orderId: string }>({ open: false, id: "", orderId: "" });
+  const [deleting, setDeleting] = useState(false);
+
   const handleChangePassword = async () => {
     if (!passwordForm.current || !passwordForm.newPass) return alert("Vui lòng điền đủ mật khẩu cũ và mới");
     setChangingPass(true);
@@ -136,20 +140,27 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteInvoice = async (id: string, orderId: string) => {
-    if (!confirm(`Bạn có chắc chắn muốn xóa yêu cầu hoá đơn \"${orderId}\" không?\nHành động này không thể hoàn tác.`)) return;
+    setDeleteModal({ open: true, id, orderId });
+  };
+
+  const confirmDelete = async () => {
+    setDeleting(true);
     try {
       const res = await fetch("/api/invoices", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id })
+        body: JSON.stringify({ id: deleteModal.id })
       });
       if (res.ok) {
-        setInvoices((prev) => prev.filter((inv) => inv.id !== id));
+        setInvoices((prev) => prev.filter((inv) => inv.id !== deleteModal.id));
+        setDeleteModal({ open: false, id: "", orderId: "" });
       } else {
         alert("Xóa thất bại. Vui lòng thử lại.");
       }
     } catch (err) {
       alert("Lỗi kết nối máy chủ");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -527,6 +538,65 @@ export default function AdminDashboard() {
         </div>
         )}
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => !deleting && setDeleteModal({ open: false, id: "", orderId: "" })}>
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          
+          {/* Modal Card */}
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 flex flex-col items-center gap-4 animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Icon */}
+            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+              <span className="material-symbols-outlined text-red-500 text-4xl">delete_forever</span>
+            </div>
+
+            {/* Text */}
+            <div className="text-center">
+              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Xác nhận Xóa</h2>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Bạn có chắc muốn xóa yêu cầu hoá đơn?
+              </p>
+              <p className="mt-2 font-bold text-primary bg-blue-50 px-4 py-2 rounded-lg text-sm">
+                Mã đơn: {deleteModal.orderId}
+              </p>
+              <p className="text-xs text-red-500 mt-3 font-medium">⚠️ Hành động này không thể hoàn tác.</p>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-3 w-full mt-2">
+              <button
+                onClick={() => setDeleteModal({ open: false, id: "", orderId: "" })}
+                disabled={deleting}
+                className="flex-1 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all disabled:opacity-50"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleting}
+                className="flex-1 px-5 py-2.5 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-all flex items-center justify-center gap-2 disabled:opacity-70 shadow-sm shadow-red-200"
+              >
+                {deleting ? (
+                  <>
+                    <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+                    Đang xóa...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
+                    Xóa yêu cầu
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
