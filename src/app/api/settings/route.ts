@@ -16,7 +16,7 @@ const DEFAULT_SETTINGS = {
   guideContent: "1. Điền chính xác Mã đơn hàng của bạn.\n2. Cung cấp Mã số thuế, hệ thống sẽ tự động tra cứu Tên Công ty/Tổ chức.\n3. Điền Email thật để nhận Hoá đơn điện tử.",
   supportTitle: "Hỗ trợ nhanh",
   supportContent: "Mọi thắc mắc kỹ thuật hay sai sót trong quá trình điền Form, bạn có thể liên hệ với chúng tôi để phân xử nhé.",
-  zaloGroupLink: "https://zalo.me/g/xxxxxxx",
+  zaloGroupLink: "https://zalo.me/g/ftvesr052",
   zaloGroupQrUrl: "" // Empty by default
 };
 

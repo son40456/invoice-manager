@@ -311,6 +311,33 @@ export default function InvoiceScreen() {
             </div>
 
             <div className="md:col-span-4 space-y-6">
+              <div className="bg-tertiary-container/10 p-6 rounded-xl border border-tertiary-container/20">
+                <div className="flex items-center gap-2 mb-2 text-tertiary-fixed-dim">
+                  <span className="material-symbols-outlined">help_center</span>
+                  <span className="font-bold font-headline">{siteSettings.supportTitle}</span>
+                </div>
+                <div className="text-sm font-body text-on-surface-variant whitespace-pre-line leading-relaxed">
+                  {siteSettings.supportContent}
+                </div>
+
+                {(siteSettings.zaloGroupLink || siteSettings.zaloGroupQrUrl) && (
+                  <div className="mt-5 pt-5 border-t border-tertiary-container/20 flex flex-col items-center gap-4 text-center">
+                    {siteSettings.zaloGroupQrUrl && (
+                      <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={siteSettings.zaloGroupQrUrl} alt="Zalo QR Code" className="w-[120px] h-[120px] object-contain" />
+                      </div>
+                    )}
+                    {siteSettings.zaloGroupLink && (
+                      <a href={siteSettings.zaloGroupLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-2.5 bg-[#0068FF] text-white rounded-full font-bold text-sm shadow-md hover:shadow-lg transition-all w-full justify-center">
+                        <span className="material-symbols-outlined text-[18px]">group_add</span>
+                        Tham gia Nhóm Zalo Hỗ trợ
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center">
@@ -346,33 +373,6 @@ export default function InvoiceScreen() {
                     Chứng từ chính xác, <br />Vận hành chuyên nghiệp.
                   </p>
                 </div>
-              </div>
-
-              <div className="bg-tertiary-container/10 p-6 rounded-xl border border-tertiary-container/20">
-                <div className="flex items-center gap-2 mb-2 text-tertiary-fixed-dim">
-                  <span className="material-symbols-outlined">help_center</span>
-                  <span className="font-bold font-headline">{siteSettings.supportTitle}</span>
-                </div>
-                <div className="text-sm font-body text-on-surface-variant whitespace-pre-line leading-relaxed">
-                  {siteSettings.supportContent}
-                </div>
-
-                {(siteSettings.zaloGroupLink || siteSettings.zaloGroupQrUrl) && (
-                  <div className="mt-5 pt-5 border-t border-tertiary-container/20 flex flex-col items-center gap-4 text-center">
-                    {siteSettings.zaloGroupQrUrl && (
-                      <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={siteSettings.zaloGroupQrUrl} alt="Zalo QR Code" className="w-[120px] h-[120px] object-contain" />
-                      </div>
-                    )}
-                    {siteSettings.zaloGroupLink && (
-                      <a href={siteSettings.zaloGroupLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-2.5 bg-[#0068FF] text-white rounded-full font-bold text-sm shadow-md hover:shadow-lg transition-all w-full justify-center">
-                        <span className="material-symbols-outlined text-[18px]">group_add</span>
-                        Tham gia Nhóm Zalo Hỗ trợ
-                      </a>
-                    )}
-                  </div>
-                )}
               </div>
             </div>
           </div>
