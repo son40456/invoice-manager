@@ -255,7 +255,7 @@ export default function AdminDashboard() {
   return (
     <>
       <header className="fixed top-0 w-full z-50 bg-[#f9f9ff]/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm dark:shadow-none flex justify-between items-center px-6 py-4">
-        <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
+        <div className="max-w-[1400px] mx-auto w-full flex justify-between items-center">
           <div className="flex items-center gap-3">
             <span className="text-2xl font-black text-[#034D9E] dark:text-[#4d90e0] tracking-tight font-headline">
               Invoice Manager <span className="text-sm font-medium text-slate-500 uppercase tracking-widest pl-2 border-l-2 border-slate-300">Admin</span>
@@ -288,7 +288,7 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      <main className="flex-grow pt-28 pb-20 px-4 md:px-8 max-w-7xl mx-auto min-h-screen">
+      <main className="flex-grow pt-28 pb-20 px-4 md:px-8 max-w-[1400px] mx-auto min-h-screen">
         {activeTab === 'settings' ? (
           <div>
             <div className="mb-8 flex justify-between items-end">
