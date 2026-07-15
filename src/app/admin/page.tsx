@@ -478,11 +478,20 @@ export default function AdminDashboard() {
                 ) : (
                   filteredInvoices.map((inv) => (
                     <tr key={inv.id} className={`hover:bg-blue-50/50 transition-colors group ${inv.status === 'processed' ? 'opacity-70 bg-slate-50/50' : inv.status === 'rejected' ? 'bg-red-50/30' : ''}`}>
-                      <td className="px-6 py-4 text-slate-500 whitespace-nowrap">
-                        {formatDate(inv.createdAt)}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="font-medium text-slate-700">
+                          {new Intl.DateTimeFormat("vi-VN", { timeStyle: "short" }).format(new Date(inv.createdAt))}
+                        </div>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          {new Intl.DateTimeFormat("vi-VN", { dateStyle: "short" }).format(new Date(inv.createdAt))}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 font-semibold text-primary whitespace-nowrap">
-                        {inv.order_id}
+                      <td className="px-6 py-4 font-semibold text-primary">
+                        {inv.order_id.split(/[,;\s]+/).filter(Boolean).map((id, index) => (
+                          <div key={index} className="whitespace-nowrap mb-1 last:mb-0">
+                            {id}
+                          </div>
+                        ))}
                       </td>
                       <td className="px-6 py-4 font-medium">
                         <span className="bg-slate-100 px-2 py-1 rounded text-slate-600 border border-slate-200 whitespace-nowrap">
