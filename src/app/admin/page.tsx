@@ -22,6 +22,7 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Tabs and Settings State
   const [activeTab, setActiveTab] = useState("list");
@@ -173,6 +174,15 @@ export default function AdminDashboard() {
   };
 
   const filteredInvoices = invoices.filter(inv => {
+    // Search term
+    if (searchTerm) {
+      const lowerTerm = searchTerm.toLowerCase();
+      const matchSearch = inv.order_id.toLowerCase().includes(lowerTerm) || 
+                          inv.tax_id.toLowerCase().includes(lowerTerm) || 
+                          inv.phone.toLowerCase().includes(lowerTerm);
+      if (!matchSearch) return false;
+    }
+
     // Check status
     if (statusFilter !== "all" && inv.status !== statusFilter) return false;
 
@@ -405,6 +415,16 @@ export default function AdminDashboard() {
 
         {/* Filters Section */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-outline-variant/30 mb-6 flex flex-wrap gap-4 items-end">
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[250px]">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tìm kiếm (Mã đơn, MST, SĐT)</label>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              placeholder="Nhập từ khóa..."
+              className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+            />
+          </div>
           <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Lọc Trạng thái</label>
             <select
@@ -438,7 +458,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <button
-              onClick={() => { setStatusFilter("all"); setDateFrom(""); setDateTo(""); }}
+              onClick={() => { setSearchTerm(""); setStatusFilter("all"); setDateFrom(""); setDateTo(""); }}
               className="h-[42px] px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-bold rounded-lg transition-colors flex items-center justify-center border border-slate-200"
             >
               Xóa bộ lọc
