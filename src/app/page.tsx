@@ -97,6 +97,12 @@ export default function InvoiceScreen() {
       return;
     }
 
+    const taxIdRegex = /^[0-9\-]{10,14}$/;
+    if (!taxIdRegex.test(formData.tax_id)) {
+      showToast("Mã số thuế không hợp lệ (chỉ bao gồm số và dấu gạch ngang, 10-14 ký tự)", "error");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
