@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import logo from "../logo.png";
 
 export default function InvoiceScreen() {
   const [formData, setFormData] = useState({
@@ -130,16 +131,14 @@ export default function InvoiceScreen() {
 
   return (
     <>
-      <header className="fixed top-0 w-full z-50 bg-[#f9f9ff]/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm dark:shadow-none flex justify-between items-center px-6 py-4">
+      <header className="fixed top-0 w-full z-50 bg-[#014B91] shadow-sm flex justify-between items-center px-6 py-2">
         <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <span className="text-2xl font-black text-[#034D9E] dark:text-[#4d90e0] tracking-tight font-headline">
-              Invoice Manager
-            </span>
+            <Image src={logo} alt="Logo" className="object-contain h-10 w-auto" priority />
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="material-symbols-outlined text-slate-600 scale-95 active:duration-150 cursor-pointer">
+            <span className="material-symbols-outlined text-white/80 hover:text-white scale-95 active:duration-150 cursor-pointer">
               account_circle
             </span>
           </div>

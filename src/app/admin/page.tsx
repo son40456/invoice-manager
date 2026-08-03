@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import logo from "../../logo.png";
 
 interface InvoiceRequest {
   id: string;
@@ -264,23 +266,22 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <header className="fixed top-0 w-full z-50 bg-[#f9f9ff]/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm dark:shadow-none flex justify-between items-center px-6 py-4">
+      <header className="fixed top-0 w-full z-50 bg-[#014B91] shadow-sm flex justify-between items-center px-6 py-2">
         <div className="max-w-[1400px] mx-auto w-full flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <span className="text-2xl font-black text-[#034D9E] dark:text-[#4d90e0] tracking-tight font-headline">
-              Invoice Manager <span className="text-sm font-medium text-slate-500 uppercase tracking-widest pl-2 border-l-2 border-slate-300">Admin</span>
-            </span>
+            <Image src={logo} alt="Logo" className="object-contain h-10 w-auto" priority />
+            <span className="text-sm font-medium text-white/80 uppercase tracking-widest pl-3 border-l-2 border-white/30">Admin</span>
           </div>
-          <div className="flex items-center gap-4 text-sm font-semibold text-primary">
+          <div className="flex items-center gap-4 text-sm font-semibold text-white">
             <button 
               onClick={() => setActiveTab('list')}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${activeTab === 'list' ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-100'}`}
+              className={`px-4 py-2 rounded-lg transition-all ${activeTab === 'list' ? 'bg-white/20 text-white shadow-sm' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
             >
               Danh sách Yêu cầu
             </button>
             <button 
               onClick={() => setActiveTab('settings')}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${activeTab === 'settings' ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-100'}`}
+              className={`px-4 py-2 rounded-lg transition-all ${activeTab === 'settings' ? 'bg-white/20 text-white shadow-sm' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
             >
               Cấu hình Trang chủ
             </button>
@@ -289,7 +290,7 @@ export default function AdminDashboard() {
                  localStorage.removeItem("ledger_admin_auth");
                  window.location.href = "/admin/login";
                }}
-               className="text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+               className="text-white/70 hover:text-red-400 hover:bg-white/10 px-4 py-2 rounded-lg transition-all flex items-center gap-1"
                title="Đăng xuất"
             >
               <span className="material-symbols-outlined text-[18px]">logout</span>
