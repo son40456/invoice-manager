@@ -488,7 +488,6 @@ export default function AdminDashboard() {
                     placeholder="Điền Refresh Token để kích hoạt"
                     className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
-                  <p className="text-xs text-slate-400 mt-1 italic">* Lấy từ Zalo OA Console → Công cụ → Lấy Access Token</p>
                 </div>
 
                 {/* Token Status */}
@@ -522,12 +521,8 @@ export default function AdminDashboard() {
                       </>
                     )}
                   </div>
-                  {/* Cron info + Manual refresh */}
-                  <div className="border-t border-current/20 pt-3 flex items-center justify-between gap-3">
-                    <div className="text-xs opacity-70 flex items-center gap-1.5">
-                      <span>🕛</span>
-                      <span>Tự động làm mới lúc <strong>00:00 UTC</strong> mỗi ngày qua Vercel Cron</span>
-                    </div>
+                  {/* Manual refresh */}
+                  <div className="border-t border-current/20 pt-3 flex items-center justify-end gap-3">
                     <button
                       onClick={handleManualRefresh}
                       disabled={manualRefreshing}
@@ -548,12 +543,6 @@ export default function AdminDashboard() {
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col gap-4">
                 <div className="flex items-center gap-2 text-primary font-headline font-bold text-xl mb-2 pb-4 border-b border-outline-variant/30">
                   <span className="text-xl">📋</span> Template ZNS
-                </div>
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-blue-700 leading-relaxed">
-                  <p className="font-bold mb-1">📌 Hướng dẫn tạo Template:</p>
-                  <p>1. Vào <strong>Zalo OA Console → ZNS → Quản lý Template</strong></p>
-                  <p>2. Tạo template với biến phù hợp (xem gợi ý bên dưới)</p>
-                  <p>3. Chờ duyệt (1-3 ngày), sau đó copy Template ID vào đây</p>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">
@@ -600,8 +589,6 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                   )}
-                  
-                  <p className="text-xs text-slate-400 mt-2">Gợi ý biến template: <code className="bg-slate-100 px-1 rounded">order_id</code>, <code className="bg-slate-100 px-1 rounded">tax_code</code>, <code className="bg-slate-100 px-1 rounded">company_name</code>, <code className="bg-slate-100 px-1 rounded">tax_address</code>, <code className="bg-slate-100 px-1 rounded">phone_number</code>, <code className="bg-slate-100 px-1 rounded">customer_email</code></p>
                 </div>
                 
                 <div>
@@ -649,8 +636,6 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                   )}
-
-                  <p className="text-xs text-slate-400 mt-2">Gợi ý biến template: <code className="bg-slate-100 px-1 rounded">order_id</code>, <code className="bg-slate-100 px-1 rounded">status_text</code></p>
                 </div>
 
                 {/* Save Button + Status Message */}
