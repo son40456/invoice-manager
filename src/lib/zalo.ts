@@ -144,19 +144,43 @@ async function sendZaloZNS(
   try {
     const formattedPhone = formatZaloPhone(phone);
     
-    const res = await fetch('https://business.openapi.zalo.me/message/template', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        access_token: config.access_token,
-      },
-      body: JSON.stringify({
-        phone: formattedPhone,
-        template_id: templateId,
-        template_data: templateData,
-        tracking_id: `inv_${Date.now()}`,
-      }),
+    const payload = JSON.stringify({
+      phone: formattedPhone,
+      template_id: templateId,
+      template_data: templateData,
+      tracking_id: `inv_${Date.now()}`,
     });
+
+    let res: Response | null = null;
+    let fetchError: any = null;
+    let attempt = 0;
+    const maxRetries = 3;
+
+    while (attempt < maxRetries) {
+      try {
+        res = await fetch('https://business.openapi.zalo.me/message/template', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            access_token: config.access_token,
+          },
+          body: payload,
+        });
+        break; // fetch thành công
+      } catch (err: any) {
+        fetchError = err;
+        attempt++;
+        if (attempt < maxRetries) {
+          console.warn(`[Zalo] Lỗi mạng khi gửi ZNS (lần ${attempt}): ${err.message}. Đang thử lại...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
+      }
+    }
+
+    if (!res) {
+      console.error('[Zalo] Lỗi mạng sau 3 lần thử:', fetchError);
+      return { success: false, error_msg: `NETWORK_ERROR: ${fetchError?.message}` };
+    }
 
     const result: ZaloSendResponse = await res.json();
 

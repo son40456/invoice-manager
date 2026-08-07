@@ -19,10 +19,12 @@ export async function POST(request: Request) {
       }
     });
 
-    // Bắn Email xác nhận ngầm (Không block trình duyệt của khách quá lâu)
-    sendConfirmationEmail(newInvoice).catch(console.error);
-    // Gửi Zalo ZNS thông báo xác nhận yêu cầu (non-blocking)
-    sendNewInvoiceNotification(newInvoice).catch(console.error);
+    // Bắn Email và Zalo ZNS đồng thời, chờ hoàn thành trước khi trả response.
+    // Phải await ở Vercel Serverless để process không bị ngắt ngang gây lỗi "fetch failed"
+    await Promise.allSettled([
+      sendConfirmationEmail(newInvoice),
+      sendNewInvoiceNotification(newInvoice)
+    ]);
 
     return NextResponse.json({ success: true, data: newInvoice }, { status: 201 });
   } catch (error) {
@@ -56,8 +58,9 @@ export async function PATCH(request: Request) {
       data: { status }
     });
 
-    // Gửi Zalo ZNS thông báo cập nhật trạng thái (non-blocking)
-    sendStatusUpdateNotification(updatedInvoice, status).catch(console.error);
+    // Gửi Zalo ZNS thông báo cập nhật trạng thái
+    // Phải await để Vercel không ngắt process giữa chừng
+    await sendStatusUpdateNotification(updatedInvoice, status).catch(console.error);
 
     return NextResponse.json({ success: true, data: updatedInvoice });
   } catch (error) {
