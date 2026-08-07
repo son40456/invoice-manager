@@ -44,6 +44,7 @@ export default function AdminDashboard() {
     zalo_app_secret: "",
     zalo_access_token: "",
     zalo_refresh_token: "",
+    zalo_refresh_token_masked: "",
     zalo_template_new: "",
     zalo_template_status: "",
   });
@@ -131,9 +132,10 @@ export default function AdminDashboard() {
           ...prev,
           zalo_app_id: d.zalo_app_id || "",
           zalo_access_token: d.zalo_access_token || "",
+          zalo_refresh_token_masked: d.zalo_refresh_token || "",
           zalo_template_new: d.zalo_template_new || "",
           zalo_template_status: d.zalo_template_status || "",
-          // Không set secret/token vì đã được mask từ server
+          // Không set secret/token thật vào ô nhập để tránh lưu đè
         }));
         setZaloTokenUpdatedAt(d.zalo_token_updated_at || "");
       }
@@ -486,7 +488,7 @@ export default function AdminDashboard() {
                       type="password"
                       value={zaloSettings.zalo_refresh_token}
                       onChange={e => setZaloSettings(p => ({ ...p, zalo_refresh_token: e.target.value }))}
-                      placeholder="Điền Refresh Token để kích hoạt"
+                      placeholder={zaloSettings.zalo_refresh_token_masked || "Refresh Token hiện tại"}
                       className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono"
                     />
                     <button
