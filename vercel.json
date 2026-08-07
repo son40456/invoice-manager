@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/zalo-refresh",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/auto-backup",
+      "schedule": "0 0 * * *"
     }
   ]
 }
