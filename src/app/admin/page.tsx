@@ -485,7 +485,7 @@ export default function AdminDashboard() {
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Refresh Token</label>
                   <div className="flex items-center gap-2">
                     <input
-                      type="password"
+                      type="text"
                       value={zaloSettings.zalo_refresh_token}
                       onChange={e => setZaloSettings(p => ({ ...p, zalo_refresh_token: e.target.value }))}
                       placeholder={zaloSettings.zalo_refresh_token_masked || "Refresh Token hiện tại"}

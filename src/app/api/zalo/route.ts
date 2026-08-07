@@ -13,9 +13,6 @@ export async function GET() {
     if (masked['zalo_access_token']) {
       masked['zalo_access_token'] = masked['zalo_access_token'].slice(0, 8) + '...';
     }
-    if (masked['zalo_refresh_token']) {
-      masked['zalo_refresh_token'] = masked['zalo_refresh_token'].slice(0, 8) + '...';
-    }
 
     return NextResponse.json({ success: true, data: masked });
   } catch (error) {
