@@ -26,3 +26,15 @@ model Setting {
   key   String @unique
   value String @db.Text
 }
+
+model ZaloLog {
+  id          String   @id @default(uuid())
+  phone       String
+  invoice_id  String
+  order_id    String
+  template_id String
+  success     Boolean
+  error_code  String?
+  error_msg   String?  @db.Text
+  createdAt   DateTime @default(now())
+}

@@ -38,6 +38,30 @@ export default function AdminDashboard() {
   });
   const [savingSettings, setSavingSettings] = useState(false);
 
+  // Zalo ZNS State
+  const [zaloSettings, setZaloSettings] = useState({
+    zalo_app_id: "",
+    zalo_app_secret: "",
+    zalo_access_token: "",
+    zalo_refresh_token: "",
+    zalo_template_new: "",
+    zalo_template_status: "",
+  });
+  const [zaloTokenUpdatedAt, setZaloTokenUpdatedAt] = useState("");
+  const [savingZalo, setSavingZalo] = useState(false);
+  const [zaloSaveMsg, setZaloSaveMsg] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [zaloLogs, setZaloLogs] = useState<{
+    id: string; phone: string; order_id: string; template_id: string;
+    success: boolean; error_code: string | null; error_msg: string | null; createdAt: string;
+  }[]>([]);
+  const [loadingZaloLogs, setLoadingZaloLogs] = useState(false);
+  const [manualRefreshing, setManualRefreshing] = useState(false);
+  
+  // Test Zalo State
+  const [testFormOpen, setTestFormOpen] = useState<string | null>(null); // 'new' | 'status'
+  const [testPhone, setTestPhone] = useState("");
+  const [testingZalo, setTestingZalo] = useState(false);
+
   // Password Change State
   const [passwordForm, setPasswordForm] = useState({ current: "", newPass: "" });
   const [changingPass, setChangingPass] = useState(false);
@@ -79,6 +103,8 @@ export default function AdminDashboard() {
 
     fetchInvoices();
     fetchSettings();
+    fetchZaloSettings();
+    fetchZaloLogs();
     
     // Auto refresh every 10 seconds to feel live
     const interval = setInterval(fetchInvoices, 10000);
@@ -92,6 +118,105 @@ export default function AdminDashboard() {
       if (json.success) setSiteSettings(json.data);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const fetchZaloSettings = async () => {
+    try {
+      const res = await fetch("/api/zalo");
+      const json = await res.json();
+      if (json.success && json.data) {
+        const d = json.data;
+        setZaloSettings(prev => ({
+          ...prev,
+          zalo_app_id: d.zalo_app_id || "",
+          zalo_access_token: d.zalo_access_token || "",
+          zalo_template_new: d.zalo_template_new || "",
+          zalo_template_status: d.zalo_template_status || "",
+          // Không set secret/token vì đã được mask từ server
+        }));
+        setZaloTokenUpdatedAt(d.zalo_token_updated_at || "");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchZaloLogs = async () => {
+    setLoadingZaloLogs(true);
+    try {
+      const res = await fetch("/api/zalo/logs");
+      const json = await res.json();
+      if (json.success) setZaloLogs(json.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingZaloLogs(false);
+    }
+  };
+
+  const handleSaveZalo = async () => {
+    setSavingZalo(true);
+    setZaloSaveMsg(null);
+    try {
+      const res = await fetch("/api/zalo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(zaloSettings),
+      });
+      const json = await res.json();
+      setZaloSaveMsg({ ok: json.success, msg: json.message });
+      if (json.success) {
+        await fetchZaloSettings();
+        await fetchZaloLogs();
+      }
+    } catch (err) {
+      setZaloSaveMsg({ ok: false, msg: "Lỗi kết nối máy chủ" });
+    } finally {
+      setSavingZalo(false);
+    }
+  };
+
+  const handleManualRefresh = async () => {
+    setManualRefreshing(true);
+    setZaloSaveMsg(null);
+    try {
+      const res = await fetch("/api/cron/zalo-refresh");
+      const json = await res.json();
+      setZaloSaveMsg({ ok: json.success, msg: json.message });
+      if (json.success) await fetchZaloSettings();
+    } catch (err) {
+      setZaloSaveMsg({ ok: false, msg: "Lỗi kết nối máy chủ" });
+    } finally {
+      setManualRefreshing(false);
+    }
+  };
+
+  const handleTestZalo = async (type: 'new' | 'status') => {
+    if (!testPhone) return alert("Vui lòng nhập số điện thoại");
+    const templateId = type === 'new' ? zaloSettings.zalo_template_new : zaloSettings.zalo_template_status;
+    if (!templateId) return alert("Vui lòng lưu Template ID trước khi test");
+
+    setTestingZalo(true);
+    try {
+      const res = await fetch("/api/zalo/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: testPhone, templateId, type })
+      });
+      const json = await res.json();
+      if (json.success) {
+        alert("Gửi thành công! Vui lòng kiểm tra Zalo.");
+        setTestFormOpen(null);
+        setTestPhone("");
+        fetchZaloLogs();
+      } else {
+        alert("Lỗi: " + (json.error_msg || json.message || "Gửi thất bại"));
+      }
+    } catch (err) {
+      alert("Lỗi kết nối máy chủ");
+    } finally {
+      setTestingZalo(false);
     }
   };
 
@@ -264,6 +389,16 @@ export default function AdminDashboard() {
     }
   };
 
+  const getRemainingTime = () => {
+    if (!zaloTokenUpdatedAt) return 0;
+    const updatedAt = new Date(zaloTokenUpdatedAt).getTime();
+    const expiresAt = updatedAt + 25 * 60 * 60 * 1000;
+    const now = Date.now();
+    const remainingMs = expiresAt - now;
+    if (remainingMs <= 0) return 0;
+    return (remainingMs / (1000 * 60 * 60)).toFixed(1);
+  };
+
   return (
     <>
       <header className="fixed top-0 w-full z-50 bg-[#014B91] shadow-sm flex justify-between items-center px-6 py-2">
@@ -286,6 +421,12 @@ export default function AdminDashboard() {
               Cấu hình Trang chủ
             </button>
             <button 
+              onClick={() => { setActiveTab('zalo'); fetchZaloLogs(); }}
+              className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 ${activeTab === 'zalo' ? 'bg-white/20 text-white shadow-sm' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
+            >
+              <span className="text-base">💬</span> Zalo ZNS
+            </button>
+            <button 
                onClick={() => {
                  localStorage.removeItem("ledger_admin_auth");
                  window.location.href = "/admin/login";
@@ -300,7 +441,310 @@ export default function AdminDashboard() {
       </header>
 
       <main className="flex-grow pt-28 pb-20 px-4 md:px-8 max-w-[1400px] mx-auto min-h-screen">
-        {activeTab === 'settings' ? (
+        {activeTab === 'zalo' ? (
+          <div>
+            <div className="mb-8">
+              <h1 className="font-headline font-extrabold text-3xl md:text-4xl text-primary tracking-tight mb-2">
+                💬 Zalo ZNS Notification
+              </h1>
+              <p className="text-on-surface-variant font-body text-sm md:text-base">
+                Cấu hình gửi thông báo tự động đến khách hàng qua Zalo khi có yêu cầu mới hoặc cập nhật trạng thái.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+              {/* Box 1: Zalo OA Credentials */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col gap-4">
+                <div className="flex items-center gap-2 text-primary font-headline font-bold text-xl mb-2 pb-4 border-b border-outline-variant/30">
+                  <span className="text-xl">🔑</span> Thông tin Zalo OA
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">App ID</label>
+                  <input
+                    type="text"
+                    value={zaloSettings.zalo_app_id}
+                    onChange={e => setZaloSettings(p => ({ ...p, zalo_app_id: e.target.value }))}
+                    placeholder="Ví dụ: 1234567890"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">App Secret</label>
+                  <input
+                    type="password"
+                    value={zaloSettings.zalo_app_secret}
+                    onChange={e => setZaloSettings(p => ({ ...p, zalo_app_secret: e.target.value }))}
+                    placeholder="Điền App Secret mới để cập nhật"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  />
+                  <p className="text-xs text-slate-400 mt-1 italic">* Không hiển thị giá trị cũ vì lý do bảo mật. Chỉ điền nếu muốn thay đổi.</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Refresh Token</label>
+                  <input
+                    type="password"
+                    value={zaloSettings.zalo_refresh_token}
+                    onChange={e => setZaloSettings(p => ({ ...p, zalo_refresh_token: e.target.value }))}
+                    placeholder="Điền Refresh Token để kích hoạt"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  />
+                  <p className="text-xs text-slate-400 mt-1 italic">* Lấy từ Zalo OA Console → Công cụ → Lấy Access Token</p>
+                </div>
+
+                {/* Token Status */}
+                <div className={`rounded-xl p-4 border text-sm ${ 
+                  zaloTokenUpdatedAt && Number(getRemainingTime()) > 0
+                    ? 'bg-slate-50 border-slate-200 text-slate-700'
+                    : 'bg-amber-50 border-amber-200 text-amber-700'
+                }`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    {zaloTokenUpdatedAt && Number(getRemainingTime()) > 0 ? (
+                      <div className="flex-1 flex items-center justify-between border border-slate-200 bg-white rounded-xl px-4 py-3 shadow-sm">
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
+                          <span className="font-mono text-slate-600 tracking-wider font-bold">
+                            {zaloSettings.zalo_access_token || "Chưa có Access Token"}
+                          </span>
+                        </div>
+                        <span className="text-emerald-600 font-bold text-sm">
+                          Hết hạn sau {getRemainingTime()} giờ
+                        </span>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="text-2xl">⚠️</span>
+                        <div className="flex-1">
+                          <div className="font-bold">Chưa có Access Token hoặc đã hết hạn</div>
+                          <div className="text-xs opacity-80 mt-0.5">
+                            Điền App ID, App Secret, Refresh Token rồi nhấn Lưu để kích hoạt.
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {/* Cron info + Manual refresh */}
+                  <div className="border-t border-current/20 pt-3 flex items-center justify-between gap-3">
+                    <div className="text-xs opacity-70 flex items-center gap-1.5">
+                      <span>🕛</span>
+                      <span>Tự động làm mới lúc <strong>00:00 UTC</strong> mỗi ngày qua Vercel Cron</span>
+                    </div>
+                    <button
+                      onClick={handleManualRefresh}
+                      disabled={manualRefreshing}
+                      title="Refresh token ngay bây giờ mà không cần đợi cron"
+                      className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white/60 hover:bg-white border border-current/30 rounded-lg text-xs font-bold transition-all disabled:opacity-50 whitespace-nowrap"
+                    >
+                      {manualRefreshing
+                        ? <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span> Đang refresh...</>
+                        : <><span className="material-symbols-outlined text-sm">refresh</span> Refresh ngay</>
+                      }
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+
+              {/* Box 2: Template Config */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col gap-4">
+                <div className="flex items-center gap-2 text-primary font-headline font-bold text-xl mb-2 pb-4 border-b border-outline-variant/30">
+                  <span className="text-xl">📋</span> Template ZNS
+                </div>
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-blue-700 leading-relaxed">
+                  <p className="font-bold mb-1">📌 Hướng dẫn tạo Template:</p>
+                  <p>1. Vào <strong>Zalo OA Console → ZNS → Quản lý Template</strong></p>
+                  <p>2. Tạo template với biến phù hợp (xem gợi ý bên dưới)</p>
+                  <p>3. Chờ duyệt (1-3 ngày), sau đó copy Template ID vào đây</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                    Template ID — Yêu cầu mới
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={zaloSettings.zalo_template_new}
+                      onChange={e => setZaloSettings(p => ({ ...p, zalo_template_new: e.target.value }))}
+                      placeholder="Ví dụ: 123456"
+                      className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono"
+                    />
+                    <button
+                      onClick={() => setTestFormOpen(testFormOpen === 'new' ? null : 'new')}
+                      className="shrink-0 px-4 py-3 bg-[#8C52FF] text-white hover:bg-[#7236F4] rounded-xl text-sm font-bold transition-colors"
+                    >
+                      Test
+                    </button>
+                  </div>
+                  
+                  {testFormOpen === 'new' && (
+                    <div className="mt-3 flex items-center gap-2 p-3 bg-[#F8F5FF] border border-[#E3D9FF] rounded-xl relative mb-2">
+                      <div className="text-[#8C52FF] ml-1 mr-1">
+                        <span className="material-symbols-outlined align-middle">smartphone</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={testPhone}
+                        onChange={e => setTestPhone(e.target.value)}
+                        placeholder="Số điện thoại test (vd: 0985633455)"
+                        className="flex-1 bg-white border-2 border-[#B996FF] focus:border-[#8C52FF] focus:ring-0 rounded-lg p-2 text-sm outline-none text-slate-700 font-mono"
+                      />
+                      <button
+                        onClick={() => handleTestZalo('new')}
+                        disabled={testingZalo}
+                        className="px-4 py-2.5 bg-[#B996FF] hover:bg-[#8C52FF] text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
+                      >
+                        {testingZalo ? <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span> : <span className="material-symbols-outlined text-sm">send</span>}
+                        Gửi
+                      </button>
+                      <button onClick={() => setTestFormOpen(null)} className="ml-1 p-1 text-slate-400 hover:text-slate-600 transition-colors">
+                        <span className="material-symbols-outlined text-xl">close</span>
+                      </button>
+                    </div>
+                  )}
+                  
+                  <p className="text-xs text-slate-400 mt-2">Gợi ý biến template: <code className="bg-slate-100 px-1 rounded">order_id</code>, <code className="bg-slate-100 px-1 rounded">tax_code</code>, <code className="bg-slate-100 px-1 rounded">company_name</code>, <code className="bg-slate-100 px-1 rounded">tax_address</code>, <code className="bg-slate-100 px-1 rounded">phone_number</code>, <code className="bg-slate-100 px-1 rounded">customer_email</code></p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                    Template ID — Cập nhật trạng thái
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={zaloSettings.zalo_template_status}
+                      onChange={e => setZaloSettings(p => ({ ...p, zalo_template_status: e.target.value }))}
+                      placeholder="Ví dụ: 654321"
+                      className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono"
+                    />
+                    <button
+                      onClick={() => setTestFormOpen(testFormOpen === 'status' ? null : 'status')}
+                      className="shrink-0 px-4 py-3 bg-[#8C52FF] text-white hover:bg-[#7236F4] rounded-xl text-sm font-bold transition-colors"
+                    >
+                      Test
+                    </button>
+                  </div>
+                  
+                  {testFormOpen === 'status' && (
+                    <div className="mt-3 flex items-center gap-2 p-3 bg-[#F8F5FF] border border-[#E3D9FF] rounded-xl relative mb-2">
+                      <div className="text-[#8C52FF] ml-1 mr-1">
+                        <span className="material-symbols-outlined align-middle">smartphone</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={testPhone}
+                        onChange={e => setTestPhone(e.target.value)}
+                        placeholder="Số điện thoại test (vd: 0985633455)"
+                        className="flex-1 bg-white border-2 border-[#B996FF] focus:border-[#8C52FF] focus:ring-0 rounded-lg p-2 text-sm outline-none text-slate-700 font-mono"
+                      />
+                      <button
+                        onClick={() => handleTestZalo('status')}
+                        disabled={testingZalo}
+                        className="px-4 py-2.5 bg-[#B996FF] hover:bg-[#8C52FF] text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
+                      >
+                        {testingZalo ? <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span> : <span className="material-symbols-outlined text-sm">send</span>}
+                        Gửi
+                      </button>
+                      <button onClick={() => setTestFormOpen(null)} className="ml-1 p-1 text-slate-400 hover:text-slate-600 transition-colors">
+                        <span className="material-symbols-outlined text-xl">close</span>
+                      </button>
+                    </div>
+                  )}
+
+                  <p className="text-xs text-slate-400 mt-2">Gợi ý biến template: <code className="bg-slate-100 px-1 rounded">order_id</code>, <code className="bg-slate-100 px-1 rounded">status_text</code></p>
+                </div>
+
+                {/* Save Button + Status Message */}
+                <div className="mt-auto pt-4 border-t border-slate-100">
+                  {zaloSaveMsg && (
+                    <div className={`mb-3 p-3 rounded-xl text-sm font-medium ${
+                      zaloSaveMsg.ok
+                        ? 'bg-green-50 border border-green-200 text-green-700'
+                        : 'bg-red-50 border border-red-200 text-red-700'
+                    }`}>
+                      {zaloSaveMsg.ok ? '✅' : '❌'} {zaloSaveMsg.msg}
+                    </div>
+                  )}
+                  <button
+                    onClick={handleSaveZalo}
+                    disabled={savingZalo}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary shadow-sm rounded-xl text-white font-bold hover:bg-[#023b7a] transition-all disabled:opacity-50"
+                  >
+                    {savingZalo
+                      ? <><span className="material-symbols-outlined animate-spin text-sm">progress_activity</span> Đang lưu...</>
+                      : <><span className="material-symbols-outlined text-sm">save</span> Lưu cấu hình Zalo (Token & Template)</>
+                    }
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Zalo Logs Table */}
+            <div className="bg-white rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+              <div className="px-6 py-4 border-b border-outline-variant/20 flex justify-between items-center">
+                <div className="flex items-center gap-2 font-headline font-bold text-lg text-primary">
+                  <span className="text-lg">📊</span> Lịch sử gửi thông báo ZNS
+                </div>
+                <button
+                  onClick={fetchZaloLogs}
+                  disabled={loadingZaloLogs}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-all disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined text-sm">refresh</span> Làm mới
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 text-slate-500 border-b border-outline-variant/30 text-xs uppercase tracking-wider">
+                    <tr>
+                      <th className="px-5 py-3 text-left font-bold">Thời gian</th>
+                      <th className="px-5 py-3 text-left font-bold">Mã đơn</th>
+                      <th className="px-5 py-3 text-left font-bold">SĐT</th>
+                      <th className="px-5 py-3 text-left font-bold">Template</th>
+                      <th className="px-5 py-3 text-center font-bold">Kết quả</th>
+                      <th className="px-5 py-3 text-left font-bold">Lỗi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant/10">
+                    {loadingZaloLogs ? (
+                      <tr><td colSpan={6} className="px-5 py-10 text-center text-slate-400">
+                        <span className="material-symbols-outlined animate-spin text-2xl">progress_activity</span>
+                      </td></tr>
+                    ) : zaloLogs.length === 0 ? (
+                      <tr><td colSpan={6} className="px-5 py-12 text-center text-slate-400">
+                        <div className="text-4xl mb-2">💬</div>
+                        <p className="text-sm">Chưa có lịch sử gửi tin. Hệ thống sẽ ghi log tự động sau khi gửi ZNS.</p>
+                      </td></tr>
+                    ) : (
+                      zaloLogs.map(log => (
+                        <tr key={log.id} className="hover:bg-slate-50/50">
+                          <td className="px-5 py-3 whitespace-nowrap text-slate-500 text-xs">
+                            {new Date(log.createdAt).toLocaleString('vi-VN')}
+                          </td>
+                          <td className="px-5 py-3 font-semibold text-primary whitespace-nowrap">{log.order_id}</td>
+                          <td className="px-5 py-3 text-slate-600 whitespace-nowrap">{log.phone}</td>
+                          <td className="px-5 py-3">
+                            <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-mono">{log.template_id}</span>
+                          </td>
+                          <td className="px-5 py-3 text-center">
+                            {log.success
+                              ? <span className="bg-green-100 text-green-700 font-bold text-xs px-3 py-1 rounded-full">✅ Thành công</span>
+                              : <span className="bg-red-100 text-red-700 font-bold text-xs px-3 py-1 rounded-full">❌ Thất bại</span>
+                            }
+                          </td>
+                          <td className="px-5 py-3 text-xs text-slate-400">
+                            {log.error_code ? (
+                              <span className="font-mono text-red-500">{log.error_code}: {log.error_msg}</span>
+                            ) : '—'}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        ) : activeTab === 'settings' ? (
           <div>
             <div className="mb-8 flex justify-between items-end">
               <div>

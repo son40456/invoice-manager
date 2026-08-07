@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { sendConfirmationEmail } from '@/lib/mail';
+import { sendNewInvoiceNotification, sendStatusUpdateNotification } from '@/lib/zalo';
 
 export async function POST(request: Request) {
   try {
@@ -20,6 +21,8 @@ export async function POST(request: Request) {
 
     // Bắn Email xác nhận ngầm (Không block trình duyệt của khách quá lâu)
     sendConfirmationEmail(newInvoice).catch(console.error);
+    // Gửi Zalo ZNS thông báo xác nhận yêu cầu (non-blocking)
+    sendNewInvoiceNotification(newInvoice).catch(console.error);
 
     return NextResponse.json({ success: true, data: newInvoice }, { status: 201 });
   } catch (error) {
@@ -52,6 +55,9 @@ export async function PATCH(request: Request) {
       where: { id },
       data: { status }
     });
+
+    // Gửi Zalo ZNS thông báo cập nhật trạng thái (non-blocking)
+    sendStatusUpdateNotification(updatedInvoice, status).catch(console.error);
 
     return NextResponse.json({ success: true, data: updatedInvoice });
   } catch (error) {
