@@ -465,7 +465,7 @@ export default function AdminDashboard() {
                     value={zaloSettings.zalo_app_id}
                     onChange={e => setZaloSettings(p => ({ ...p, zalo_app_id: e.target.value }))}
                     placeholder="Ví dụ: 1234567890"
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono"
                   />
                 </div>
                 <div>
@@ -475,66 +475,38 @@ export default function AdminDashboard() {
                     value={zaloSettings.zalo_app_secret}
                     onChange={e => setZaloSettings(p => ({ ...p, zalo_app_secret: e.target.value }))}
                     placeholder="Điền App Secret mới để cập nhật"
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono"
                   />
-                  <p className="text-xs text-slate-400 mt-1 italic">* Không hiển thị giá trị cũ vì lý do bảo mật. Chỉ điền nếu muốn thay đổi.</p>
+                  <p className="text-xs text-slate-400 mt-2 italic">* Không hiển thị giá trị cũ vì lý do bảo mật. Chỉ điền nếu muốn thay đổi.</p>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Refresh Token</label>
-                  <input
-                    type="password"
-                    value={zaloSettings.zalo_refresh_token}
-                    onChange={e => setZaloSettings(p => ({ ...p, zalo_refresh_token: e.target.value }))}
-                    placeholder="Điền Refresh Token để kích hoạt"
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                  />
-                </div>
-
-                {/* Token Status */}
-                <div className={`rounded-xl p-4 border text-sm ${ 
-                  zaloTokenUpdatedAt && Number(getRemainingTime()) > 0
-                    ? 'bg-slate-50 border-slate-200 text-slate-700'
-                    : 'bg-amber-50 border-amber-200 text-amber-700'
-                }`}>
-                  <div className="flex items-center gap-3 mb-3">
-                    {zaloTokenUpdatedAt && Number(getRemainingTime()) > 0 ? (
-                      <div className="flex-1 flex items-center justify-between border border-slate-200 bg-white rounded-xl px-4 py-3 shadow-sm">
-                        <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
-                          <span className="font-mono text-slate-600 tracking-wider font-bold">
-                            {zaloSettings.zalo_access_token || "Chưa có Access Token"}
-                          </span>
-                        </div>
-                        <span className="text-emerald-600 font-bold text-sm">
-                          Hết hạn sau {getRemainingTime()} giờ
-                        </span>
-                      </div>
-                    ) : (
-                      <>
-                        <span className="text-2xl">⚠️</span>
-                        <div className="flex-1">
-                          <div className="font-bold">Chưa có Access Token hoặc đã hết hạn</div>
-                          <div className="text-xs opacity-80 mt-0.5">
-                            Điền App ID, App Secret, Refresh Token rồi nhấn Lưu để kích hoạt.
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  {/* Manual refresh */}
-                  <div className="border-t border-current/20 pt-3 flex items-center justify-end gap-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="password"
+                      value={zaloSettings.zalo_refresh_token}
+                      onChange={e => setZaloSettings(p => ({ ...p, zalo_refresh_token: e.target.value }))}
+                      placeholder="Điền Refresh Token để kích hoạt"
+                      className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono"
+                    />
                     <button
                       onClick={handleManualRefresh}
                       disabled={manualRefreshing}
-                      title="Refresh token ngay bây giờ mà không cần đợi cron"
-                      className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white/60 hover:bg-white border border-current/30 rounded-lg text-xs font-bold transition-all disabled:opacity-50 whitespace-nowrap"
+                      className="shrink-0 px-4 py-3 bg-[#8C52FF] text-white hover:bg-[#7236F4] rounded-xl text-sm font-bold transition-colors disabled:opacity-50"
                     >
-                      {manualRefreshing
-                        ? <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span> Đang refresh...</>
-                        : <><span className="material-symbols-outlined text-sm">refresh</span> Refresh ngay</>
-                      }
+                      {manualRefreshing ? "Đang xử lý..." : "Refresh"}
                     </button>
                   </div>
+                  {zaloTokenUpdatedAt && Number(getRemainingTime()) > 0 ? (
+                    <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1.5">
+                      <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                      Access Token đang hoạt động (Hết hạn sau {getRemainingTime()} giờ)
+                    </p>
+                  ) : (
+                    <p className="text-xs text-amber-600 font-bold mt-2 flex items-center gap-1.5">
+                      ⚠️ Chưa có Access Token hoặc đã hết hạn
+                    </p>
+                  )}
                 </div>
               </div>
 
