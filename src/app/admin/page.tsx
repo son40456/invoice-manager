@@ -21,7 +21,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   // Filters State
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("pending");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,6 +70,16 @@ export default function AdminDashboard() {
   // Delete Confirmation Modal State
   const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: string; orderId: string }>({ open: false, id: "", orderId: "" });
   const [deleting, setDeleting] = useState(false);
+
+  // Copy state
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = (text: string, key: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedId(key);
+      setTimeout(() => setCopiedId(null), 1800);
+    });
+  };
 
   const handleChangePassword = async () => {
     if (!passwordForm.current || !passwordForm.newPass) return alert("Vui lòng điền đủ mật khẩu cũ và mới");
@@ -789,35 +799,72 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <div>
-            <div className="flex justify-between items-end mb-8">
-              <div>
-                <h1 className="font-headline font-extrabold text-3xl md:text-4xl text-primary tracking-tight mb-2">
-                  Danh sách Yêu cầu Xuất Hoá đơn
-                </h1>
-                <p className="text-on-surface-variant font-body text-sm md:text-base">
-                  Theo dõi và xử lý các yêu cầu được gửi từ khách hàng. Dữ liệu sẽ tự động làm mới.
-                </p>
-              </div>
-          <div className="hidden md:flex gap-3">
+            <div className="mb-6">
+              <h1 className="font-headline font-extrabold text-3xl md:text-4xl text-primary tracking-tight mb-1">
+                Danh sách Yêu cầu Xuất Hoá đơn
+              </h1>
+              <p className="text-on-surface-variant font-body text-sm md:text-base">
+                Theo dõi và xử lý các yêu cầu được gửi từ khách hàng. Dữ liệu sẽ tự động làm mới.
+              </p>
+            </div>
+
+        {/* Status Filter Tabs + Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2 mb-5">
+          {[
+            { key: 'pending',   label: 'Đang chờ duyệt', icon: 'pending_actions' },
+            { key: 'processed', label: 'Đã xử lý',        icon: 'check_circle'   },
+            { key: 'rejected',  label: 'Bị từ chối',      icon: 'cancel'         },
+            { key: 'all',       label: 'Tất cả',           icon: 'list'           },
+          ].map(tab => {
+            const count = tab.key === 'all'
+              ? invoices.length
+              : invoices.filter(inv => inv.status === tab.key).length;
+            const isActive = statusFilter === tab.key;
+            const colorMap: Record<string, string> = {
+              pending:   isActive ? 'bg-[#F97316] text-white border-[#F97316] shadow-md shadow-orange-100' : 'bg-white text-slate-600 border-slate-200 hover:border-orange-300 hover:text-orange-600',
+              processed: isActive ? 'bg-[#16a34a] text-white border-[#16a34a] shadow-md shadow-green-100'  : 'bg-white text-slate-600 border-slate-200 hover:border-green-400 hover:text-green-700',
+              rejected:  isActive ? 'bg-[#dc2626] text-white border-[#dc2626] shadow-md shadow-red-100'    : 'bg-white text-slate-600 border-slate-200 hover:border-red-400 hover:text-red-600',
+              all:       isActive ? 'bg-primary   text-white border-primary   shadow-md shadow-blue-100'    : 'bg-white text-slate-600 border-slate-200 hover:border-primary/60 hover:text-primary',
+            };
+            const badgeMap: Record<string, string> = {
+              pending:   isActive ? 'bg-white/25 text-white'        : 'bg-orange-100 text-orange-700',
+              processed: isActive ? 'bg-white/25 text-white'        : 'bg-green-100  text-green-700',
+              rejected:  isActive ? 'bg-white/25 text-white'        : 'bg-red-100    text-red-700',
+              all:       isActive ? 'bg-white/25 text-white'        : 'bg-slate-100  text-slate-600',
+            };
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setStatusFilter(tab.key)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border font-semibold text-sm transition-all duration-200 ${colorMap[tab.key]}`}
+              >
+                <span className="material-symbols-outlined text-[16px]">{tab.icon}</span>
+                {tab.label}
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badgeMap[tab.key]}`}>{count}</span>
+              </button>
+            );
+          })}
+          {/* Action buttons aligned right */}
+          <div className="ml-auto flex gap-2 shrink-0">
             <button
               onClick={handleExportExcel}
               disabled={filteredInvoices.length === 0}
-              className="flex items-center gap-2 px-5 py-2.5 bg-green-600 shadow-sm rounded-lg text-white font-bold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 shadow-sm rounded-lg text-white font-bold text-sm hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span className="material-symbols-outlined text-sm">download</span>
+              <span className="material-symbols-outlined text-[16px]">download</span>
               Xuất Excel danh sách này
             </button>
             <button
               onClick={fetchInvoices}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white border border-outline-variant/50 shadow-sm rounded-lg text-primary font-bold hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-outline-variant/50 shadow-sm rounded-lg text-primary font-bold text-sm hover:bg-slate-50 transition-colors"
             >
-              <span className="material-symbols-outlined text-sm">refresh</span>
+              <span className="material-symbols-outlined text-[16px]">refresh</span>
               Làm mới
             </button>
           </div>
         </div>
 
-        {/* Filters Section */}
+        {/* Search & Date Filters */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-outline-variant/30 mb-6 flex flex-wrap gap-4 items-end">
           <div className="flex flex-col gap-1.5 flex-1 min-w-[250px]">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tìm kiếm (Mã đơn, MST, SĐT)</label>
@@ -828,19 +875,6 @@ export default function AdminDashboard() {
               placeholder="Nhập từ khóa..."
               className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
             />
-          </div>
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Lọc Trạng thái</label>
-            <select
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
-              className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
-            >
-              <option value="all">🌐 Tất cả trạng thái</option>
-              <option value="pending">⏳ Đang chờ duyệt</option>
-              <option value="processed">✅ Đã xử lý</option>
-              <option value="rejected">❌ Bị từ chối</option>
-            </select>
           </div>
           <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Từ ngày</label>
@@ -862,7 +896,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <button
-              onClick={() => { setSearchTerm(""); setStatusFilter("all"); setDateFrom(""); setDateTo(""); }}
+              onClick={() => { setSearchTerm(""); setStatusFilter("pending"); setDateFrom(""); setDateTo(""); }}
               className="h-[42px] px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-bold rounded-lg transition-colors flex items-center justify-center border border-slate-200"
             >
               Xóa bộ lọc
@@ -874,14 +908,14 @@ export default function AdminDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left font-body text-sm">
               <thead className="bg-[#f0f4f8] text-slate-600 border-b border-outline-variant/40 uppercase tracking-wider text-xs">
-                <tr>
-                  <th className="px-6 py-4 font-bold">Thời gian</th>
-                  <th className="px-6 py-4 font-bold">Mã đơn hàng</th>
-                  <th className="px-6 py-4 font-bold">Mã số thuế</th>
-                  <th className="px-6 py-4 font-bold">Công ty / Tổ chức</th>
-                  <th className="px-6 py-4 font-bold">Liên hệ</th>
-                  <th className="px-6 py-4 font-bold text-center">Trạng thái</th>
-                  <th className="px-6 py-4 font-bold text-center">Xóa</th>
+              <tr>
+                  <th className="px-4 py-4 font-bold w-[100px]">Thời gian</th>
+                  <th className="px-3 py-4 font-bold w-[120px]">Mã đơn hàng</th>
+                  <th className="px-3 py-4 font-bold w-[100px]">Mã số thuế</th>
+                  <th className="px-4 py-4 font-bold">Công ty / Tổ chức</th>
+                  <th className="px-4 py-4 font-bold w-[150px]">Liên hệ</th>
+                  <th className="px-3 py-4 font-bold text-center w-[120px]">Trạng thái</th>
+                  <th className="px-3 py-4 font-bold text-center w-[50px]">Xóa</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/20">
@@ -902,7 +936,7 @@ export default function AdminDashboard() {
                 ) : (
                   filteredInvoices.map((inv) => (
                     <tr key={inv.id} className={`hover:bg-blue-50/50 transition-colors group ${inv.status === 'processed' ? 'opacity-70 bg-slate-50/50' : inv.status === 'rejected' ? 'bg-red-50/30' : ''}`}>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <div className="font-medium text-slate-700">
                           {new Intl.DateTimeFormat("vi-VN", { timeStyle: "short" }).format(new Date(inv.createdAt))}
                         </div>
@@ -910,23 +944,51 @@ export default function AdminDashboard() {
                           {new Intl.DateTimeFormat("vi-VN", { dateStyle: "short" }).format(new Date(inv.createdAt))}
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-semibold text-primary">
+                      <td className="px-3 py-4 font-semibold text-primary">
                         {inv.order_id.split(/[,;\s]+/).filter(Boolean).map((id, index) => (
-                          <div key={index} className="whitespace-nowrap mb-1 last:mb-0">
-                            {id}
+                          <div key={index} className="flex items-center gap-1 mb-1 last:mb-0 group/copy">
+                            <span className="whitespace-nowrap text-[13px]">{id}</span>
+                            <button
+                              onClick={() => handleCopy(id, `order-${inv.id}-${index}`)}
+                              title={copiedId === `order-${inv.id}-${index}` ? 'Đã copy!' : 'Copy mã đơn'}
+                              className={`opacity-0 group-hover/copy:opacity-100 p-0.5 rounded transition-all duration-200 ${
+                                copiedId === `order-${inv.id}-${index}`
+                                  ? 'text-green-500 opacity-100'
+                                  : 'text-slate-400 hover:text-primary'
+                              }`}
+                            >
+                              <span className="material-symbols-outlined text-[14px] leading-none">
+                                {copiedId === `order-${inv.id}-${index}` ? 'check' : 'content_copy'}
+                              </span>
+                            </button>
                           </div>
                         ))}
                       </td>
-                      <td className="px-6 py-4 font-medium">
-                        <span className="bg-slate-100 px-2 py-1 rounded text-slate-600 border border-slate-200 whitespace-nowrap">
-                          {inv.tax_id}
-                        </span>
+                      <td className="px-3 py-4 font-medium">
+                        <div className="flex items-center gap-1 group/taxcopy">
+                          <span className="bg-slate-100 px-1.5 py-1 rounded text-slate-600 border border-slate-200 whitespace-nowrap font-mono text-[11px] tracking-widest">
+                            {inv.tax_id}
+                          </span>
+                          <button
+                            onClick={() => handleCopy(inv.tax_id, `tax-${inv.id}`)}
+                            title={copiedId === `tax-${inv.id}` ? 'Đã copy!' : 'Copy mã số thuế'}
+                            className={`opacity-0 group-hover/taxcopy:opacity-100 p-0.5 rounded transition-all duration-200 shrink-0 ${
+                              copiedId === `tax-${inv.id}`
+                                ? 'text-green-500 opacity-100'
+                                : 'text-slate-400 hover:text-slate-700'
+                            }`}
+                          >
+                            <span className="material-symbols-outlined text-[14px] leading-none">
+                              {copiedId === `tax-${inv.id}` ? 'check' : 'content_copy'}
+                            </span>
+                          </button>
+                        </div>
                       </td>
-                      <td className="px-6 py-4 min-w-[250px] max-w-[400px]">
+                      <td className="px-4 py-4 min-w-[250px]">
                         <div className="font-bold text-on-surface whitespace-normal break-words leading-tight">{inv.company_name}</div>
                         <div className="text-xs text-slate-500 whitespace-normal break-words mt-1.5">{inv.address}</div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <div className="flex flex-col gap-1">
                           <a href={`mailto:${inv.email}`} className="text-xs text-blue-600 hover:underline flex items-center gap-1">
                             <span className="material-symbols-outlined text-[14px]">mail</span> {inv.email}
@@ -936,7 +998,7 @@ export default function AdminDashboard() {
                           </a>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-3 py-4 text-center">
                         <select
                           value={inv.status}
                           onChange={(e) => handleUpdateStatus(inv.id, e.target.value)}
@@ -952,7 +1014,7 @@ export default function AdminDashboard() {
                           <option className="bg-white text-red-700 font-bold" value="rejected">❌ Từ chối</option>
                         </select>
                       </td>
-                      <td className="px-4 py-4 text-center">
+                      <td className="px-2 py-4 text-center">
                         <button
                           onClick={() => handleDeleteInvoice(inv.id, inv.order_id)}
                           title="Xóa yêu cầu này"
