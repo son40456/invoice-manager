@@ -57,7 +57,7 @@ export default function AdminDashboard() {
   }[]>([]);
   const [loadingZaloLogs, setLoadingZaloLogs] = useState(false);
   const [manualRefreshing, setManualRefreshing] = useState(false);
-  
+
   // Test Zalo State
   const [testFormOpen, setTestFormOpen] = useState<string | null>(null); // 'new' | 'status'
   const [testPhone, setTestPhone] = useState("");
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
     fetchSettings();
     fetchZaloSettings();
     fetchZaloLogs();
-    
+
     // Auto refresh every 10 seconds to feel live
     const interval = setInterval(fetchInvoices, 10000);
     return () => clearInterval(interval);
@@ -316,9 +316,9 @@ export default function AdminDashboard() {
     // Search term
     if (searchTerm) {
       const lowerTerm = searchTerm.toLowerCase();
-      const matchSearch = inv.order_id.toLowerCase().includes(lowerTerm) || 
-                          inv.tax_id.toLowerCase().includes(lowerTerm) || 
-                          inv.phone.toLowerCase().includes(lowerTerm);
+      const matchSearch = inv.order_id.toLowerCase().includes(lowerTerm) ||
+        inv.tax_id.toLowerCase().includes(lowerTerm) ||
+        inv.phone.toLowerCase().includes(lowerTerm);
       if (!matchSearch) return false;
     }
 
@@ -420,31 +420,31 @@ export default function AdminDashboard() {
             <span className="text-sm font-medium text-white/80 uppercase tracking-widest pl-3 border-l-2 border-white/30">Admin</span>
           </div>
           <div className="flex items-center gap-4 text-sm font-semibold text-white">
-            <button 
+            <button
               onClick={() => setActiveTab('list')}
               className={`px-4 py-2 rounded-lg transition-all ${activeTab === 'list' ? 'bg-white/20 text-white shadow-sm' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
             >
               Danh sách Yêu cầu
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('settings')}
               className={`px-4 py-2 rounded-lg transition-all ${activeTab === 'settings' ? 'bg-white/20 text-white shadow-sm' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
             >
               Cấu hình Trang chủ
             </button>
-            <button 
+            <button
               onClick={() => { setActiveTab('zalo'); fetchZaloLogs(); }}
               className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 ${activeTab === 'zalo' ? 'bg-white/20 text-white shadow-sm' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
             >
               <span className="text-base">💬</span> Zalo ZNS
             </button>
-            <button 
-               onClick={() => {
-                 localStorage.removeItem("ledger_admin_auth");
-                 window.location.href = "/admin/login";
-               }}
-               className="text-white/70 hover:text-red-400 hover:bg-white/10 px-4 py-2 rounded-lg transition-all flex items-center gap-1"
-               title="Đăng xuất"
+            <button
+              onClick={() => {
+                localStorage.removeItem("ledger_admin_auth");
+                window.location.href = "/admin/login";
+              }}
+              className="text-white/70 hover:text-red-400 hover:bg-white/10 px-4 py-2 rounded-lg transition-all flex items-center gap-1"
+              title="Đăng xuất"
             >
               <span className="material-symbols-outlined text-[18px]">logout</span>
             </button>
@@ -547,7 +547,7 @@ export default function AdminDashboard() {
                       Test
                     </button>
                   </div>
-                  
+
                   {testFormOpen === 'new' && (
                     <div className="mt-3 flex items-center gap-2 p-3 bg-[#F8F5FF] border border-[#E3D9FF] rounded-xl relative mb-2">
                       <div className="text-[#8C52FF] ml-1 mr-1">
@@ -574,7 +574,7 @@ export default function AdminDashboard() {
                     </div>
                   )}
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">
                     Template ID — Cập nhật trạng thái
@@ -594,7 +594,7 @@ export default function AdminDashboard() {
                       Test
                     </button>
                   </div>
-                  
+
                   {testFormOpen === 'status' && (
                     <div className="mt-3 flex items-center gap-2 p-3 bg-[#F8F5FF] border border-[#E3D9FF] rounded-xl relative mb-2">
                       <div className="text-[#8C52FF] ml-1 mr-1">
@@ -625,11 +625,10 @@ export default function AdminDashboard() {
                 {/* Save Button + Status Message */}
                 <div className="mt-auto pt-4 border-t border-slate-100">
                   {zaloSaveMsg && (
-                    <div className={`mb-3 p-3 rounded-xl text-sm font-medium ${
-                      zaloSaveMsg.ok
+                    <div className={`mb-3 p-3 rounded-xl text-sm font-medium ${zaloSaveMsg.ok
                         ? 'bg-green-50 border border-green-200 text-green-700'
                         : 'bg-red-50 border border-red-200 text-red-700'
-                    }`}>
+                      }`}>
                       {zaloSaveMsg.ok ? '✅' : '❌'} {zaloSaveMsg.msg}
                     </div>
                   )}
@@ -724,7 +723,7 @@ export default function AdminDashboard() {
                   Chỉnh sửa trực tiếp nội dung hiển thị ở các khối Hướng dẫn và Hỗ trợ trên Trang chủ.
                 </p>
               </div>
-              <button 
+              <button
                 onClick={handleSaveSettings}
                 disabled={savingSettings}
                 className="flex items-center gap-2 px-6 py-2.5 bg-primary shadow-sm rounded-lg text-white font-bold hover:bg-[#023b7a] transition-all disabled:opacity-50"
@@ -733,7 +732,7 @@ export default function AdminDashboard() {
                 Lưu cấu hình
               </button>
             </div>
-            
+
             <div className="grid md:grid-cols-2 gap-8">
               {/* Box 1: Guide */}
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col gap-4">
@@ -742,11 +741,11 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Tiêu đề khối</label>
-                  <input type="text" value={siteSettings.guideTitle} onChange={(e) => setSiteSettings(p => ({...p, guideTitle: e.target.value}))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  <input type="text" value={siteSettings.guideTitle} onChange={(e) => setSiteSettings(p => ({ ...p, guideTitle: e.target.value }))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Nội dung (hỗ trợ tự động xuống dòng)</label>
-                  <textarea rows={5} value={siteSettings.guideContent} onChange={(e) => setSiteSettings(p => ({...p, guideContent: e.target.value}))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
+                  <textarea rows={5} value={siteSettings.guideContent} onChange={(e) => setSiteSettings(p => ({ ...p, guideContent: e.target.value }))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
                 </div>
               </div>
 
@@ -757,19 +756,19 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Tiêu đề khối</label>
-                  <input type="text" value={siteSettings.supportTitle} onChange={(e) => setSiteSettings(p => ({...p, supportTitle: e.target.value}))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  <input type="text" value={siteSettings.supportTitle} onChange={(e) => setSiteSettings(p => ({ ...p, supportTitle: e.target.value }))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Nội dung (hỗ trợ tự động xuống dòng)</label>
-                  <textarea rows={5} value={siteSettings.supportContent} onChange={(e) => setSiteSettings(p => ({...p, supportContent: e.target.value}))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
+                  <textarea rows={5} value={siteSettings.supportContent} onChange={(e) => setSiteSettings(p => ({ ...p, supportContent: e.target.value }))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
                 </div>
                 <div className="border-t border-slate-200 pt-4 mt-2">
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">🔗 Link tham gia Nhóm Zalo Hỗ trợ</label>
-                  <input type="text" value={siteSettings.zaloGroupLink || ""} onChange={(e) => setSiteSettings(p => ({...p, zaloGroupLink: e.target.value}))} placeholder="https://zalo.me/g/..." className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                  <input type="text" value={siteSettings.zaloGroupLink || ""} onChange={(e) => setSiteSettings(p => ({ ...p, zaloGroupLink: e.target.value }))} placeholder="https://zalo.me/g/..." className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">📷 Link URL ảnh Mã QR Zalo</label>
-                  <input type="text" value={siteSettings.zaloGroupQrUrl || ""} onChange={(e) => setSiteSettings(p => ({...p, zaloGroupQrUrl: e.target.value}))} placeholder="https://...qr.png" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                  <input type="text" value={siteSettings.zaloGroupQrUrl || ""} onChange={(e) => setSiteSettings(p => ({ ...p, zaloGroupQrUrl: e.target.value }))} placeholder="https://...qr.png" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
                   <p className="text-xs text-slate-500 mt-2 italic">* Tải ảnh QR lên mạng (như Imgur.com) và copy dán Link ảnh vào đây để hiển thị mã QR.</p>
                 </div>
               </div>
@@ -777,16 +776,16 @@ export default function AdminDashboard() {
               {/* Box 3: Security */}
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-red-200/50 flex flex-col gap-4 md:col-span-2 mt-4">
                 <div className="flex items-center gap-2 text-red-600 font-headline font-bold text-xl mb-2 pb-4 border-b border-red-100">
-                  <span className="material-symbols-outlined">security</span> Báo mật: Đổi Mật Khẩu Admin
+                  <span className="material-symbols-outlined">security</span> Bảo mật: Đổi Mật Khẩu Admin
                 </div>
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1">
                     <label className="block text-sm font-bold text-slate-700 mb-1.5">Mật khẩu hiện tại</label>
-                    <input type="password" value={passwordForm.current} onChange={(e) => setPasswordForm(p => ({...p, current: e.target.value}))} placeholder="••••••" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400" />
+                    <input type="password" value={passwordForm.current} onChange={(e) => setPasswordForm(p => ({ ...p, current: e.target.value }))} placeholder="••••••" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400" />
                   </div>
                   <div className="flex-1">
                     <label className="block text-sm font-bold text-slate-700 mb-1.5">Mật khẩu mới</label>
-                    <input type="password" value={passwordForm.newPass} onChange={(e) => setPasswordForm(p => ({...p, newPass: e.target.value}))} placeholder="••••••" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400" />
+                    <input type="password" value={passwordForm.newPass} onChange={(e) => setPasswordForm(p => ({ ...p, newPass: e.target.value }))} placeholder="••••••" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400" />
                   </div>
                   <div className="flex items-end">
                     <button onClick={handleChangePassword} disabled={changingPass} className="w-full md:w-auto px-6 py-3 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold hover:bg-red-600 hover:text-white transition-all disabled:opacity-50 h-[46px] mt-[26px]">
@@ -808,229 +807,227 @@ export default function AdminDashboard() {
               </p>
             </div>
 
-        {/* Status Filter Tabs + Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2 mb-5">
-          {[
-            { key: 'pending',   label: 'Đang chờ duyệt', icon: 'pending_actions' },
-            { key: 'processed', label: 'Đã xử lý',        icon: 'check_circle'   },
-            { key: 'rejected',  label: 'Bị từ chối',      icon: 'cancel'         },
-            { key: 'all',       label: 'Tất cả',           icon: 'list'           },
-          ].map(tab => {
-            const count = tab.key === 'all'
-              ? invoices.length
-              : invoices.filter(inv => inv.status === tab.key).length;
-            const isActive = statusFilter === tab.key;
-            const colorMap: Record<string, string> = {
-              pending:   isActive ? 'bg-[#F97316] text-white border-[#F97316] shadow-md shadow-orange-100' : 'bg-white text-slate-600 border-slate-200 hover:border-orange-300 hover:text-orange-600',
-              processed: isActive ? 'bg-[#16a34a] text-white border-[#16a34a] shadow-md shadow-green-100'  : 'bg-white text-slate-600 border-slate-200 hover:border-green-400 hover:text-green-700',
-              rejected:  isActive ? 'bg-[#dc2626] text-white border-[#dc2626] shadow-md shadow-red-100'    : 'bg-white text-slate-600 border-slate-200 hover:border-red-400 hover:text-red-600',
-              all:       isActive ? 'bg-primary   text-white border-primary   shadow-md shadow-blue-100'    : 'bg-white text-slate-600 border-slate-200 hover:border-primary/60 hover:text-primary',
-            };
-            const badgeMap: Record<string, string> = {
-              pending:   isActive ? 'bg-white/25 text-white'        : 'bg-orange-100 text-orange-700',
-              processed: isActive ? 'bg-white/25 text-white'        : 'bg-green-100  text-green-700',
-              rejected:  isActive ? 'bg-white/25 text-white'        : 'bg-red-100    text-red-700',
-              all:       isActive ? 'bg-white/25 text-white'        : 'bg-slate-100  text-slate-600',
-            };
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setStatusFilter(tab.key)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full border font-semibold text-sm transition-all duration-200 ${colorMap[tab.key]}`}
-              >
-                <span className="material-symbols-outlined text-[16px]">{tab.icon}</span>
-                {tab.label}
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badgeMap[tab.key]}`}>{count}</span>
-              </button>
-            );
-          })}
-          {/* Action buttons aligned right */}
-          <div className="ml-auto flex gap-2 shrink-0">
-            <button
-              onClick={handleExportExcel}
-              disabled={filteredInvoices.length === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 shadow-sm rounded-lg text-white font-bold text-sm hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="material-symbols-outlined text-[16px]">download</span>
-              Xuất Excel danh sách này
-            </button>
-            <button
-              onClick={fetchInvoices}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-outline-variant/50 shadow-sm rounded-lg text-primary font-bold text-sm hover:bg-slate-50 transition-colors"
-            >
-              <span className="material-symbols-outlined text-[16px]">refresh</span>
-              Làm mới
-            </button>
-          </div>
-        </div>
+            {/* Status Filter Tabs + Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2 mb-5">
+              {[
+                { key: 'pending', label: 'Đang chờ duyệt', icon: 'pending_actions' },
+                { key: 'processed', label: 'Đã xử lý', icon: 'check_circle' },
+                { key: 'rejected', label: 'Bị từ chối', icon: 'cancel' },
+                { key: 'all', label: 'Tất cả', icon: 'list' },
+              ].map(tab => {
+                const count = tab.key === 'all'
+                  ? invoices.length
+                  : invoices.filter(inv => inv.status === tab.key).length;
+                const isActive = statusFilter === tab.key;
+                const colorMap: Record<string, string> = {
+                  pending: isActive ? 'bg-[#F97316] text-white border-[#F97316] shadow-md shadow-orange-100' : 'bg-white text-slate-600 border-slate-200 hover:border-orange-300 hover:text-orange-600',
+                  processed: isActive ? 'bg-[#16a34a] text-white border-[#16a34a] shadow-md shadow-green-100' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400 hover:text-green-700',
+                  rejected: isActive ? 'bg-[#dc2626] text-white border-[#dc2626] shadow-md shadow-red-100' : 'bg-white text-slate-600 border-slate-200 hover:border-red-400 hover:text-red-600',
+                  all: isActive ? 'bg-primary   text-white border-primary   shadow-md shadow-blue-100' : 'bg-white text-slate-600 border-slate-200 hover:border-primary/60 hover:text-primary',
+                };
+                const badgeMap: Record<string, string> = {
+                  pending: isActive ? 'bg-white/25 text-white' : 'bg-orange-100 text-orange-700',
+                  processed: isActive ? 'bg-white/25 text-white' : 'bg-green-100  text-green-700',
+                  rejected: isActive ? 'bg-white/25 text-white' : 'bg-red-100    text-red-700',
+                  all: isActive ? 'bg-white/25 text-white' : 'bg-slate-100  text-slate-600',
+                };
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setStatusFilter(tab.key)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full border font-semibold text-sm transition-all duration-200 ${colorMap[tab.key]}`}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">{tab.icon}</span>
+                    {tab.label}
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badgeMap[tab.key]}`}>{count}</span>
+                  </button>
+                );
+              })}
+              {/* Action buttons aligned right */}
+              <div className="ml-auto flex gap-2 shrink-0">
+                <button
+                  onClick={handleExportExcel}
+                  disabled={filteredInvoices.length === 0}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 shadow-sm rounded-lg text-white font-bold text-sm hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="material-symbols-outlined text-[16px]">download</span>
+                  Xuất Excel danh sách này
+                </button>
+                <button
+                  onClick={fetchInvoices}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-outline-variant/50 shadow-sm rounded-lg text-primary font-bold text-sm hover:bg-slate-50 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">refresh</span>
+                  Làm mới
+                </button>
+              </div>
+            </div>
 
-        {/* Search & Date Filters */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-outline-variant/30 mb-6 flex flex-wrap gap-4 items-end">
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[250px]">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tìm kiếm (Mã đơn, MST, SĐT)</label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              placeholder="Nhập từ khóa..."
-              className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
-            />
-          </div>
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Từ ngày</label>
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={e => setDateFrom(e.target.value)}
-              className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 font-medium"
-            />
-          </div>
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đến ngày</label>
-            <input
-              type="date"
-              value={dateTo}
-              onChange={e => setDateTo(e.target.value)}
-              className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 font-medium"
-            />
-          </div>
-          <div>
-            <button
-              onClick={() => { setSearchTerm(""); setStatusFilter("pending"); setDateFrom(""); setDateTo(""); }}
-              className="h-[42px] px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-bold rounded-lg transition-colors flex items-center justify-center border border-slate-200"
-            >
-              Xóa bộ lọc
-            </button>
-          </div>
-        </div>
+            {/* Search & Date Filters */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-outline-variant/30 mb-6 flex flex-wrap gap-4 items-end">
+              <div className="flex flex-col gap-1.5 flex-1 min-w-[250px]">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tìm kiếm (Mã đơn, MST, SĐT)</label>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  placeholder="Nhập từ khóa..."
+                  className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Từ ngày</label>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={e => setDateFrom(e.target.value)}
+                  className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 font-medium"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đến ngày</label>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={e => setDateTo(e.target.value)}
+                  className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 font-medium"
+                />
+              </div>
+              <div>
+                <button
+                  onClick={() => { setSearchTerm(""); setStatusFilter("pending"); setDateFrom(""); setDateTo(""); }}
+                  className="h-[42px] px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-bold rounded-lg transition-colors flex items-center justify-center border border-slate-200"
+                >
+                  Xóa bộ lọc
+                </button>
+              </div>
+            </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left font-body text-sm">
-              <thead className="bg-[#f0f4f8] text-slate-600 border-b border-outline-variant/40 uppercase tracking-wider text-xs">
-              <tr>
-                  <th className="px-4 py-4 font-bold w-[100px]">Thời gian</th>
-                  <th className="px-3 py-4 font-bold w-[120px]">Mã đơn hàng</th>
-                  <th className="px-3 py-4 font-bold w-[100px]">Mã số thuế</th>
-                  <th className="px-4 py-4 font-bold">Công ty / Tổ chức</th>
-                  <th className="px-4 py-4 font-bold w-[150px]">Liên hệ</th>
-                  <th className="px-3 py-4 font-bold text-center w-[120px]">Trạng thái</th>
-                  <th className="px-3 py-4 font-bold text-center w-[50px]">Xóa</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-outline-variant/20">
-                {loading && invoices.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                      <span className="material-symbols-outlined animate-spin text-3xl text-primary mb-2">progress_activity</span>
-                      <p>Đang tải dữ liệu...</p>
-                    </td>
-                  </tr>
-                ) : filteredInvoices.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                      <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">search_off</span>
-                      <p>Không tìm thấy hoá đơn nào khớp với bộ lọc.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredInvoices.map((inv) => (
-                    <tr key={inv.id} className={`hover:bg-blue-50/50 transition-colors group ${inv.status === 'processed' ? 'opacity-70 bg-slate-50/50' : inv.status === 'rejected' ? 'bg-red-50/30' : ''}`}>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="font-medium text-slate-700">
-                          {new Intl.DateTimeFormat("vi-VN", { timeStyle: "short" }).format(new Date(inv.createdAt))}
-                        </div>
-                        <div className="text-xs text-slate-500 mt-0.5">
-                          {new Intl.DateTimeFormat("vi-VN", { dateStyle: "short" }).format(new Date(inv.createdAt))}
-                        </div>
-                      </td>
-                      <td className="px-3 py-4 font-semibold text-primary">
-                        {inv.order_id.split(/[,;\s]+/).filter(Boolean).map((id, index) => (
-                          <div key={index} className="flex items-center gap-1 mb-1 last:mb-0 group/copy">
-                            <span className="whitespace-nowrap text-[13px]">{id}</span>
-                            <button
-                              onClick={() => handleCopy(id, `order-${inv.id}-${index}`)}
-                              title={copiedId === `order-${inv.id}-${index}` ? 'Đã copy!' : 'Copy mã đơn'}
-                              className={`opacity-0 group-hover/copy:opacity-100 p-0.5 rounded transition-all duration-200 ${
-                                copiedId === `order-${inv.id}-${index}`
-                                  ? 'text-green-500 opacity-100'
-                                  : 'text-slate-400 hover:text-primary'
-                              }`}
-                            >
-                              <span className="material-symbols-outlined text-[14px] leading-none">
-                                {copiedId === `order-${inv.id}-${index}` ? 'check' : 'content_copy'}
-                              </span>
-                            </button>
-                          </div>
-                        ))}
-                      </td>
-                      <td className="px-3 py-4 font-medium">
-                        <div className="flex items-center gap-1 group/taxcopy">
-                          <span className="bg-slate-100 px-1.5 py-1 rounded text-slate-600 border border-slate-200 whitespace-nowrap font-mono text-[11px] tracking-widest">
-                            {inv.tax_id}
-                          </span>
-                          <button
-                            onClick={() => handleCopy(inv.tax_id, `tax-${inv.id}`)}
-                            title={copiedId === `tax-${inv.id}` ? 'Đã copy!' : 'Copy mã số thuế'}
-                            className={`opacity-0 group-hover/taxcopy:opacity-100 p-0.5 rounded transition-all duration-200 shrink-0 ${
-                              copiedId === `tax-${inv.id}`
-                                ? 'text-green-500 opacity-100'
-                                : 'text-slate-400 hover:text-slate-700'
-                            }`}
-                          >
-                            <span className="material-symbols-outlined text-[14px] leading-none">
-                              {copiedId === `tax-${inv.id}` ? 'check' : 'content_copy'}
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 min-w-[250px]">
-                        <div className="font-bold text-on-surface whitespace-normal break-words leading-tight">{inv.company_name}</div>
-                        <div className="text-xs text-slate-500 whitespace-normal break-words mt-1.5">{inv.address}</div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex flex-col gap-1">
-                          <a href={`mailto:${inv.email}`} className="text-xs text-blue-600 hover:underline flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[14px]">mail</span> {inv.email}
-                          </a>
-                          <a href={`tel:${inv.phone}`} className="text-xs text-slate-600 hover:underline flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[14px]">phone</span> {inv.phone}
-                          </a>
-                        </div>
-                      </td>
-                      <td className="px-3 py-4 text-center">
-                        <select
-                          value={inv.status}
-                          onChange={(e) => handleUpdateStatus(inv.id, e.target.value)}
-                          className={`font-bold outline-none cursor-pointer appearance-none rounded-full px-4 py-1.5 text-xs text-center border shadow-sm transition-all ${inv.status === 'processed'
-                            ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200'
-                            : inv.status === 'rejected'
-                              ? 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200'
-                              : 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200'
-                            }`}
-                        >
-                          <option className="bg-white text-amber-700 font-bold" value="pending">⏳ Chờ duyệt</option>
-                          <option className="bg-white text-green-700 font-bold" value="processed">✅ Đã xử lý</option>
-                          <option className="bg-white text-red-700 font-bold" value="rejected">❌ Từ chối</option>
-                        </select>
-                      </td>
-                      <td className="px-2 py-4 text-center">
-                        <button
-                          onClick={() => handleDeleteInvoice(inv.id, inv.order_id)}
-                          title="Xóa yêu cầu này"
-                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">delete</span>
-                        </button>
-                      </td>
+            <div className="bg-white rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left font-body text-sm">
+                  <thead className="bg-[#f0f4f8] text-slate-600 border-b border-outline-variant/40 uppercase tracking-wider text-xs">
+                    <tr>
+                      <th className="px-4 py-4 font-bold w-[100px]">Thời gian</th>
+                      <th className="px-3 py-4 font-bold w-[120px]">Mã đơn hàng</th>
+                      <th className="px-3 py-4 font-bold w-[100px]">Mã số thuế</th>
+                      <th className="px-4 py-4 font-bold">Công ty / Tổ chức</th>
+                      <th className="px-4 py-4 font-bold w-[150px]">Liên hệ</th>
+                      <th className="px-3 py-4 font-bold text-center w-[120px]">Trạng thái</th>
+                      <th className="px-3 py-4 font-bold text-center w-[50px]">Xóa</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant/20">
+                    {loading && invoices.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                          <span className="material-symbols-outlined animate-spin text-3xl text-primary mb-2">progress_activity</span>
+                          <p>Đang tải dữ liệu...</p>
+                        </td>
+                      </tr>
+                    ) : filteredInvoices.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                          <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">search_off</span>
+                          <p>Không tìm thấy hoá đơn nào khớp với bộ lọc.</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredInvoices.map((inv) => (
+                        <tr key={inv.id} className={`hover:bg-blue-50/50 transition-colors group ${inv.status === 'processed' ? 'opacity-70 bg-slate-50/50' : inv.status === 'rejected' ? 'bg-red-50/30' : ''}`}>
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <div className="font-medium text-slate-700">
+                              {new Intl.DateTimeFormat("vi-VN", { timeStyle: "short" }).format(new Date(inv.createdAt))}
+                            </div>
+                            <div className="text-xs text-slate-500 mt-0.5">
+                              {new Intl.DateTimeFormat("vi-VN", { dateStyle: "short" }).format(new Date(inv.createdAt))}
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 font-semibold text-primary">
+                            {inv.order_id.split(/[,;\s]+/).filter(Boolean).map((id, index) => (
+                              <div key={index} className="flex items-center gap-1 mb-1 last:mb-0 group/copy">
+                                <span className="whitespace-nowrap text-[13px]">{id}</span>
+                                <button
+                                  onClick={() => handleCopy(id, `order-${inv.id}-${index}`)}
+                                  title={copiedId === `order-${inv.id}-${index}` ? 'Đã copy!' : 'Copy mã đơn'}
+                                  className={`opacity-0 group-hover/copy:opacity-100 p-0.5 rounded transition-all duration-200 ${copiedId === `order-${inv.id}-${index}`
+                                      ? 'text-green-500 opacity-100'
+                                      : 'text-slate-400 hover:text-primary'
+                                    }`}
+                                >
+                                  <span className="material-symbols-outlined text-[14px] leading-none">
+                                    {copiedId === `order-${inv.id}-${index}` ? 'check' : 'content_copy'}
+                                  </span>
+                                </button>
+                              </div>
+                            ))}
+                          </td>
+                          <td className="px-3 py-4 font-medium">
+                            <div className="flex items-center gap-1 group/taxcopy">
+                              <span className="bg-slate-100 px-1.5 py-1 rounded text-slate-600 border border-slate-200 whitespace-nowrap font-mono text-[11px] tracking-widest">
+                                {inv.tax_id}
+                              </span>
+                              <button
+                                onClick={() => handleCopy(inv.tax_id, `tax-${inv.id}`)}
+                                title={copiedId === `tax-${inv.id}` ? 'Đã copy!' : 'Copy mã số thuế'}
+                                className={`opacity-0 group-hover/taxcopy:opacity-100 p-0.5 rounded transition-all duration-200 shrink-0 ${copiedId === `tax-${inv.id}`
+                                    ? 'text-green-500 opacity-100'
+                                    : 'text-slate-400 hover:text-slate-700'
+                                  }`}
+                              >
+                                <span className="material-symbols-outlined text-[14px] leading-none">
+                                  {copiedId === `tax-${inv.id}` ? 'check' : 'content_copy'}
+                                </span>
+                              </button>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 min-w-[250px]">
+                            <div className="font-bold text-on-surface whitespace-normal break-words leading-tight">{inv.company_name}</div>
+                            <div className="text-xs text-slate-500 whitespace-normal break-words mt-1.5">{inv.address}</div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex flex-col gap-1">
+                              <a href={`mailto:${inv.email}`} className="text-xs text-blue-600 hover:underline flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[14px]">mail</span> {inv.email}
+                              </a>
+                              <a href={`tel:${inv.phone}`} className="text-xs text-slate-600 hover:underline flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[14px]">phone</span> {inv.phone}
+                              </a>
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 text-center">
+                            <select
+                              value={inv.status}
+                              onChange={(e) => handleUpdateStatus(inv.id, e.target.value)}
+                              className={`font-bold outline-none cursor-pointer appearance-none rounded-full px-4 py-1.5 text-xs text-center border shadow-sm transition-all ${inv.status === 'processed'
+                                ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200'
+                                : inv.status === 'rejected'
+                                  ? 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200'
+                                  : 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200'
+                                }`}
+                            >
+                              <option className="bg-white text-amber-700 font-bold" value="pending">⏳ Chờ duyệt</option>
+                              <option className="bg-white text-green-700 font-bold" value="processed">✅ Đã xử lý</option>
+                              <option className="bg-white text-red-700 font-bold" value="rejected">❌ Từ chối</option>
+                            </select>
+                          </td>
+                          <td className="px-2 py-4 text-center">
+                            <button
+                              onClick={() => handleDeleteInvoice(inv.id, inv.order_id)}
+                              title="Xóa yêu cầu này"
+                              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">delete</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-        </div>
-        </div>
         )}
       </main>
 
@@ -1039,7 +1036,7 @@ export default function AdminDashboard() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => !deleting && setDeleteModal({ open: false, id: "", orderId: "" })}>
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-          
+
           {/* Modal Card */}
           <div
             className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 flex flex-col items-center gap-4 animate-in fade-in zoom-in-95 duration-200"
