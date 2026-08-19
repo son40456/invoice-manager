@@ -16,7 +16,7 @@ interface InvoiceRequest {
   status: string;
 }
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ adminPath = "/lmc-quan-tri" }: { adminPath?: string }) {
   const [invoices, setInvoices] = useState<InvoiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
       });
       if (res.ok) {
         alert("Đã đăng xuất khỏi tất cả các thiết bị thành công! Vui lòng đăng nhập lại.");
-        window.location.href = "/admin/login";
+        window.location.href = `${adminPath}/login`;
       } else {
         alert("Có lỗi xảy ra khi hủy phiên đăng nhập.");
       }
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
 
   const handleAuthError = () => {
     localStorage.removeItem("ledger_admin_auth");
-    window.location.href = "/admin/login";
+    window.location.href = `${adminPath}/login`;
   };
 
   // 2FA State
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
       timeoutId = setTimeout(async () => {
         alert("Phiên đăng nhập đã hết hạn do không có thao tác trong 30 phút.");
         await fetch("/api/auth/logout", { method: "POST" });
-        window.location.href = "/admin/login";
+        window.location.href = `${adminPath}/login`;
       }, 30 * 60 * 1000);
     };
 
@@ -614,7 +614,7 @@ export default function AdminDashboard() {
                   console.error(e);
                 }
                 localStorage.removeItem("ledger_admin_auth");
-                window.location.href = "/admin/login";
+                window.location.href = `${adminPath}/login`;
               }}
               className="text-white/70 hover:text-red-400 hover:bg-white/10 px-4 py-2 rounded-lg transition-all flex items-center gap-1"
               title="Đăng xuất"

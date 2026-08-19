@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function AdminLoginForm() {
+export default function AdminLoginForm({ adminPath = "/lmc-quan-tri" }: { adminPath?: string }) {
   const [step, setStep] = useState<"password" | "2fa">("password");
   const [password, setPassword] = useState("");
   const [totpCode, setTotpCode] = useState("");
@@ -33,7 +33,7 @@ export default function AdminLoginForm() {
         }
 
         localStorage.setItem("ledger_admin_auth", "true");
-        window.location.href = "/admin";
+        window.location.href = adminPath;
       } else {
         setError(true);
         setErrorMessage(data.error || "Mật khẩu hoặc mã OTP không chính xác!");

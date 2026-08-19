@@ -178,3 +178,10 @@ export function clearAdminSessionCookie(response: NextResponse): NextResponse {
   });
   return response;
 }
+
+/** Get secret Admin URL path configured via ADMIN_SECRET_PATH environment variable */
+export function getAdminSecretPath(): string {
+  const custom = process.env.ADMIN_SECRET_PATH?.trim().replace(/^\/+|\/+$/g, '');
+  return custom ? `/${custom}` : '/lmc-quan-tri';
+}
+
