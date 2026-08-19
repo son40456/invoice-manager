@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { verifyAdminSession } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
+    const isAuthed = await verifyAdminSession(request);
+    if (!isAuthed) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Vui lòng đăng nhập' }, { status: 401 });
+    }
+
     const { currentPassword, newPassword } = await request.json();
 
     if (!currentPassword || !newPassword) {
@@ -41,7 +47,6 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, message: 'Đổi mật khẩu thành công!' });
-    
   } catch (error) {
     console.error('Change password error:', error);
     return NextResponse.json({ success: false, error: 'Lỗi máy chủ' }, { status: 500 });

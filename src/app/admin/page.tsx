@@ -104,14 +104,12 @@ export default function AdminDashboard() {
     }
   };
 
-  useEffect(() => {
-    // Auth Check
-    const isAuthed = localStorage.getItem("ledger_admin_auth");
-    if (!isAuthed) {
-      window.location.href = "/admin/login";
-      return;
-    }
+  const handleAuthError = () => {
+    localStorage.removeItem("ledger_admin_auth");
+    window.location.href = "/admin/login";
+  };
 
+  useEffect(() => {
     fetchInvoices();
     fetchSettings();
     fetchZaloSettings();
@@ -125,6 +123,7 @@ export default function AdminDashboard() {
   const fetchSettings = async () => {
     try {
       const res = await fetch("/api/settings");
+      if (res.status === 401) return handleAuthError();
       const json = await res.json();
       if (json.success) setSiteSettings(json.data);
     } catch (err) {
@@ -135,6 +134,7 @@ export default function AdminDashboard() {
   const fetchZaloSettings = async () => {
     try {
       const res = await fetch("/api/zalo");
+      if (res.status === 401) return handleAuthError();
       const json = await res.json();
       if (json.success && json.data) {
         const d = json.data;
@@ -158,6 +158,7 @@ export default function AdminDashboard() {
     setLoadingZaloLogs(true);
     try {
       const res = await fetch("/api/zalo/logs");
+      if (res.status === 401) return handleAuthError();
       const json = await res.json();
       if (json.success) setZaloLogs(json.data);
     } catch (err) {
@@ -176,6 +177,7 @@ export default function AdminDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(zaloSettings),
       });
+      if (res.status === 401) return handleAuthError();
       const json = await res.json();
       setZaloSaveMsg({ ok: json.success, msg: json.message });
       if (json.success) {
@@ -194,6 +196,7 @@ export default function AdminDashboard() {
     setZaloSaveMsg(null);
     try {
       const res = await fetch("/api/cron/zalo-refresh");
+      if (res.status === 401) return handleAuthError();
       const json = await res.json();
       setZaloSaveMsg({ ok: json.success, msg: json.message });
       if (json.success) await fetchZaloSettings();
@@ -216,6 +219,7 @@ export default function AdminDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: testPhone, templateId, type })
       });
+      if (res.status === 401) return handleAuthError();
       const json = await res.json();
       if (json.success) {
         alert("Gửi thành công! Vui lòng kiểm tra Zalo.");
@@ -240,6 +244,7 @@ export default function AdminDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(siteSettings),
       });
+      if (res.status === 401) return handleAuthError();
       if (res.ok) alert("Đã lưu cấu hình thành công!");
     } catch (err) {
       console.error(err);
@@ -251,6 +256,7 @@ export default function AdminDashboard() {
   const fetchInvoices = async () => {
     try {
       const res = await fetch("/api/invoices");
+      if (res.status === 401) return handleAuthError();
       const json = await res.json();
       if (json.success) {
         setInvoices(json.data);
@@ -439,7 +445,12 @@ export default function AdminDashboard() {
               <span className="text-base">💬</span> Zalo ZNS
             </button>
             <button
-              onClick={() => {
+              onClick={async () => {
+                try {
+                  await fetch('/api/auth/logout', { method: 'POST' });
+                } catch (e) {
+                  console.error(e);
+                }
                 localStorage.removeItem("ledger_admin_auth");
                 window.location.href = "/admin/login";
               }}

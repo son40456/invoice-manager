@@ -1,5 +1,18 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { verifyAdminSession } from '@/lib/auth';
+
+// Whitelisted public settings that are safe to expose and modify via this endpoint
+export const PUBLIC_SETTING_KEYS = [
+  'guideTitle',
+  'guideContent',
+  'supportTitle',
+  'supportContent',
+  'zaloGroupLink',
+  'zaloGroupQrUrl'
+] as const;
+
+type PublicSettingKey = typeof PUBLIC_SETTING_KEYS[number];
 
 // Helper to upsert a key-value setting
 async function upsertSetting(key: string, value: string) {
@@ -11,46 +24,59 @@ async function upsertSetting(key: string, value: string) {
 }
 
 // Default settings
-const DEFAULT_SETTINGS = {
+const DEFAULT_SETTINGS: Record<PublicSettingKey, string> = {
   guideTitle: "Hướng dẫn Yêu cầu hoá đơn",
   guideContent: "1. Điền chính xác Mã đơn hàng của bạn.\n2. Cung cấp Mã số thuế, hệ thống sẽ tự động tra cứu Tên Công ty/Tổ chức.\n3. Điền Email thật để nhận Hoá đơn điện tử.",
   supportTitle: "Hỗ trợ nhanh",
   supportContent: "Mọi thắc mắc kỹ thuật hay sai sót trong quá trình điền Form, bạn có thể liên hệ với chúng tôi để phân xử nhé.",
   zaloGroupLink: "https://zalo.me/g/ftvesr052",
-  zaloGroupQrUrl: "" // Empty by default
+  zaloGroupQrUrl: ""
 };
 
 export async function GET() {
   try {
-    const settings = await prisma.setting.findMany();
-    // Convert array of settings to object
-    const settingsObj = { ...DEFAULT_SETTINGS };
+    // Only query safe public setting keys (prevents leaking admin password hash or integration secrets)
+    const settings = await prisma.setting.findMany({
+      where: {
+        key: { in: Array.from(PUBLIC_SETTING_KEYS) }
+      }
+    });
+
+    const settingsObj: Record<string, string> = { ...DEFAULT_SETTINGS };
     
     settings.forEach(s => {
-      // @ts-ignore
-      settingsObj[s.key] = s.value;
+      if (PUBLIC_SETTING_KEYS.includes(s.key as PublicSettingKey)) {
+        settingsObj[s.key] = s.value;
+      }
     });
 
     return NextResponse.json({ success: true, data: settingsObj });
   } catch (error) {
     console.error('Error fetching settings:', error);
-    // If DB fails (e.g. not migrated yet), return defaults so site doesn't break
     return NextResponse.json({ success: true, data: DEFAULT_SETTINGS });
   }
 }
 
 export async function POST(request: Request) {
   try {
+    // 1. Enforce Server-Side Authentication
+    const isAuthed = await verifyAdminSession(request);
+    if (!isAuthed) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Yêu cầu quyền quản trị viên' }, { status: 401 });
+    }
+
     const body = await request.json();
+    const savedData: Record<string, string> = {};
     
-    // Save all keys in the body
+    // 2. Strict Whitelist: Only allow modifications to safe public setting keys
     for (const [key, value] of Object.entries(body)) {
-      if (typeof value === 'string') {
+      if (PUBLIC_SETTING_KEYS.includes(key as PublicSettingKey) && typeof value === 'string') {
         await upsertSetting(key, value);
+        savedData[key] = value;
       }
     }
     
-    return NextResponse.json({ success: true, data: body });
+    return NextResponse.json({ success: true, data: savedData });
   } catch (error) {
     console.error('Error saving settings:', error);
     return NextResponse.json({ success: false, error: 'Failed to update settings' }, { status: 500 });

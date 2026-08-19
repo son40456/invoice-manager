@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { sendTestNotification } from '@/lib/zalo';
+import { verifyAdminSession } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
+    const isAuthed = await verifyAdminSession(request);
+    if (!isAuthed) {
+      return NextResponse.json({ success: false, message: 'Unauthorized: Yêu cầu quyền quản trị viên' }, { status: 401 });
+    }
+
     const { phone, templateId, type } = await request.json();
 
     if (!phone || !templateId) {

@@ -5,12 +5,14 @@ import { useState } from "react";
 export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(false);
+    setErrorMessage("");
 
     try {
       const res = await fetch('/api/auth/login', {
@@ -20,15 +22,17 @@ export default function AdminLogin() {
       });
       const data = await res.json();
 
-      if (data.success) {
+      if (res.ok && data.success) {
         localStorage.setItem("ledger_admin_auth", "true");
         window.location.href = "/admin";
       } else {
         setError(true);
-        setTimeout(() => setError(false), 3000);
+        setErrorMessage(data.error || "Mật khẩu không chính xác!");
+        setTimeout(() => setError(false), 3500);
       }
     } catch (err) {
       setError(true);
+      setErrorMessage("Lỗi kết nối máy chủ");
     } finally {
       setLoading(false);
     }
@@ -69,7 +73,7 @@ export default function AdminLogin() {
                 required
               />
             </div>
-            {error && <p className="text-red-500 text-xs mt-2 font-medium">Mật khẩu không chính xác!</p>}
+            {error && <p className="text-red-500 text-xs mt-2 font-medium">{errorMessage}</p>}
           </div>
 
           <button
@@ -89,7 +93,7 @@ export default function AdminLogin() {
         </form>
 
         <div className="mt-6 text-center text-xs text-slate-400">
-          Mật khẩu mặc định: <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">admin</span>
+          Hệ thống quản trị bảo mật hoá đơn điện tử LMC
         </div>
       </div>
     </div>

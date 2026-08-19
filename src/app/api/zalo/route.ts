@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getZaloSettings, saveZaloSettings } from '@/lib/zalo';
+import { verifyAdminSession } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const isAuthed = await verifyAdminSession(request);
+    if (!isAuthed) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Yêu cầu quyền quản trị viên' }, { status: 401 });
+    }
+
     const settings = await getZaloSettings();
 
     // Mask sensitive values trước khi trả về client
@@ -23,6 +29,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const isAuthed = await verifyAdminSession(request);
+    if (!isAuthed) {
+      return NextResponse.json({ success: false, message: 'Unauthorized: Yêu cầu quyền quản trị viên' }, { status: 401 });
+    }
+
     const body = await request.json();
 
     // Chỉ cho phép lưu các key Zalo hợp lệ
