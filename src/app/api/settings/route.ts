@@ -33,9 +33,13 @@ const DEFAULT_SETTINGS: Record<PublicSettingKey, string> = {
   zaloGroupQrUrl: ""
 };
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Only query safe public setting keys (prevents leaking admin password hash or integration secrets)
+    const isAuthed = await verifyAdminSession(request);
+    if (!isAuthed) {
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 });
+    }
+
     const settings = await prisma.setting.findMany({
       where: {
         key: { in: Array.from(PUBLIC_SETTING_KEYS) }
@@ -59,16 +63,15 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    // 1. Enforce Server-Side Authentication
     const isAuthed = await verifyAdminSession(request);
     if (!isAuthed) {
-      return NextResponse.json({ success: false, error: 'Unauthorized: Yêu cầu quyền quản trị viên' }, { status: 401 });
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 });
     }
 
     const body = await request.json();
     const savedData: Record<string, string> = {};
     
-    // 2. Strict Whitelist: Only allow modifications to safe public setting keys
+    // Strict Whitelist: Only allow modifications to safe public setting keys
     for (const [key, value] of Object.entries(body)) {
       if (PUBLIC_SETTING_KEYS.includes(key as PublicSettingKey) && typeof value === 'string') {
         await upsertSetting(key, value);

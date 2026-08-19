@@ -4,12 +4,12 @@ import { getZaloConfig, refreshZaloToken } from '@/lib/zalo';
 // Cron Job: Tự động làm mới Zalo Access Token mỗi ngày
 // Được gọi bởi Vercel Cron (vercel.json) lúc 0h00 UTC hàng ngày
 export async function GET(request: Request) {
-  // Fail-Closed: Bắt buộc CRON_SECRET phải được cấu hình và khớp với Authorization header
+  // Fail-Closed: Bắt buộc CRON_SECRET phải được cấu hình và khớp với Authorization header, cloaked as 404
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized: Missing or invalid CRON_SECRET' }, { status: 401 });
+    return NextResponse.json({ error: 'Not Found' }, { status: 404 });
   }
 
   try {

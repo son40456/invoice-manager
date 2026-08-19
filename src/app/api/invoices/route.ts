@@ -51,7 +51,7 @@ export async function GET(request: Request) {
   try {
     const isAuthed = await verifyAdminSession(request);
     if (!isAuthed) {
-      return NextResponse.json({ success: false, error: 'Unauthorized: Yêu cầu quyền quản trị viên' }, { status: 401 });
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 });
     }
 
     const invoices = await prisma.invoiceRequest.findMany({
@@ -69,7 +69,7 @@ export async function PATCH(request: Request) {
   try {
     const isAuthed = await verifyAdminSession(request);
     if (!isAuthed) {
-      return NextResponse.json({ success: false, error: 'Unauthorized: Yêu cầu quyền quản trị viên' }, { status: 401 });
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 });
     }
 
     const { id, status } = await request.json();
@@ -103,7 +103,7 @@ export async function DELETE(request: Request) {
   try {
     const isAuthed = await verifyAdminSession(request);
     if (!isAuthed) {
-      return NextResponse.json({ success: false, error: 'Unauthorized: Yêu cầu quyền quản trị viên' }, { status: 401 });
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 });
     }
 
     const { id } = await request.json();

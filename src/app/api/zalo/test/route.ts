@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   try {
     const isAuthed = await verifyAdminSession(request);
     if (!isAuthed) {
-      return NextResponse.json({ success: false, message: 'Unauthorized: Yêu cầu quyền quản trị viên' }, { status: 401 });
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 });
     }
 
     const { phone, templateId, type } = await request.json();

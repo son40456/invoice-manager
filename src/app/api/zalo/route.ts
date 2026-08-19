@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   try {
     const isAuthed = await verifyAdminSession(request);
     if (!isAuthed) {
-      return NextResponse.json({ success: false, error: 'Unauthorized: Yêu cầu quyền quản trị viên' }, { status: 401 });
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 });
     }
 
     const settings = await getZaloSettings();
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   try {
     const isAuthed = await verifyAdminSession(request);
     if (!isAuthed) {
-      return NextResponse.json({ success: false, message: 'Unauthorized: Yêu cầu quyền quản trị viên' }, { status: 401 });
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 });
     }
 
     const body = await request.json();

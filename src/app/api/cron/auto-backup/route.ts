@@ -37,12 +37,12 @@ async function sendBackupTelegram(botToken: string, chatId: string, jsonBuffer: 
 
 export async function GET(request: Request) {
   try {
-    // Fail-Closed security: Require CRON_SECRET to be configured and matched
+    // Fail-Closed security: Require CRON_SECRET to be configured and matched, cloaked as 404
     const cronSecret = process.env.CRON_SECRET;
     const authHeader = request.headers.get('authorization');
 
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: 'Unauthorized: Missing or invalid CRON_SECRET' }, { status: 401 });
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 });
     }
 
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
