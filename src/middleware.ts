@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyAdminSession } from '@/lib/auth';
+import { verifyAdminSessionFast } from '@/lib/auth';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isAuthed = await verifyAdminSession(request);
+  const isAuthed = await verifyAdminSessionFast(request);
 
   // 1. Protect /admin UI pages (redirect unauthenticated to /admin/login)
   if (pathname.startsWith('/admin')) {

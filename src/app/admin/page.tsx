@@ -92,7 +92,7 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (res.ok) {
-        alert(data.message);
+        alert(data.message || "Đổi mật khẩu thành công! Tất cả các thiết bị khác đã được đăng xuất.");
         setPasswordForm({ current: "", newPass: "" });
       } else {
         alert(data.error || "Có lỗi xảy ra");
@@ -101,6 +101,31 @@ export default function AdminDashboard() {
       alert("Lỗi kết nối máy chủ");
     } finally {
       setChangingPass(false);
+    }
+  };
+
+  const [revokingSessions, setRevokingSessions] = useState(false);
+
+  const handleRevokeAllSessions = async () => {
+    if (!confirm("Bạn có chắc chắn muốn ĐĂNG XUẤT KHỎI TẤT CẢ CÁC THIẾT BỊ KHÁC không?\n\nTất cả các phiên đăng nhập trên máy tính và điện thoại khác sẽ bị vô hiệu hoá ngay lập tức.")) {
+      return;
+    }
+
+    setRevokingSessions(true);
+    try {
+      const res = await fetch("/api/auth/revoke-all-sessions", {
+        method: "POST",
+      });
+      if (res.ok) {
+        alert("Đã đăng xuất khỏi tất cả các thiết bị thành công! Vui lòng đăng nhập lại.");
+        window.location.href = "/admin/login";
+      } else {
+        alert("Có lỗi xảy ra khi hủy phiên đăng nhập.");
+      }
+    } catch (err) {
+      alert("Lỗi kết nối máy chủ");
+    } finally {
+      setRevokingSessions(false);
     }
   };
 
@@ -785,24 +810,50 @@ export default function AdminDashboard() {
               </div>
 
               {/* Box 3: Security */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-red-200/50 flex flex-col gap-4 md:col-span-2 mt-4">
-                <div className="flex items-center gap-2 text-red-600 font-headline font-bold text-xl mb-2 pb-4 border-b border-red-100">
-                  <span className="material-symbols-outlined">security</span> Bảo mật: Đổi Mật Khẩu Admin
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-red-200/50 flex flex-col gap-6 md:col-span-2 mt-4">
+                <div>
+                  <div className="flex items-center gap-2 text-red-600 font-headline font-bold text-xl mb-2 pb-4 border-b border-red-100">
+                    <span className="material-symbols-outlined">security</span> Bảo mật & Quản lý Phiên Đăng Nhập
+                  </div>
+                  <p className="text-xs text-slate-500 mb-4">
+                    * Khi Đổi Mật Khẩu hoặc bấm Đăng Xuất Tất Cả Thiết Bị, mọi phiên đăng nhập trên các máy tính và điện thoại khác sẽ bị vô hiệu hoá ngay lập tức.
+                  </p>
                 </div>
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1">
+
+                <div className="flex flex-col md:flex-row gap-4 items-end">
+                  <div className="flex-1 w-full">
                     <label className="block text-sm font-bold text-slate-700 mb-1.5">Mật khẩu hiện tại</label>
                     <input type="password" value={passwordForm.current} onChange={(e) => setPasswordForm(p => ({ ...p, current: e.target.value }))} placeholder="••••••" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400" />
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 w-full">
                     <label className="block text-sm font-bold text-slate-700 mb-1.5">Mật khẩu mới</label>
                     <input type="password" value={passwordForm.newPass} onChange={(e) => setPasswordForm(p => ({ ...p, newPass: e.target.value }))} placeholder="••••••" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400" />
                   </div>
-                  <div className="flex items-end">
-                    <button onClick={handleChangePassword} disabled={changingPass} className="w-full md:w-auto px-6 py-3 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold hover:bg-red-600 hover:text-white transition-all disabled:opacity-50 h-[46px] mt-[26px]">
+                  <div className="flex gap-2 w-full md:w-auto">
+                    <button onClick={handleChangePassword} disabled={changingPass} className="w-full md:w-auto px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all disabled:opacity-50 h-[46px] shadow-sm">
                       {changingPass ? "Đang xử lý..." : "Đổi mật khẩu"}
                     </button>
                   </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-red-500 text-base">devices</span>
+                      Đăng xuất từ xa khỏi các máy khác
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      Thu hồi quyền truy cập của tất cả các phiên đăng nhập đang hoạt động trên các trình duyệt khác.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleRevokeAllSessions}
+                    disabled={revokingSessions}
+                    className="w-full md:w-auto px-5 py-2.5 bg-slate-100 text-slate-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 border border-slate-200 rounded-xl text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-base">logout</span>
+                    {revokingSessions ? "Đang đăng xuất..." : "Đăng xuất khỏi tất cả thiết bị"}
+                  </button>
                 </div>
               </div>
             </div>
