@@ -134,11 +134,148 @@ export default function AdminDashboard() {
     window.location.href = "/admin/login";
   };
 
+  // 2FA State
+  const [is2faEnabled, setIs2faEnabled] = useState(false);
+  const [loading2fa, setLoading2fa] = useState(false);
+  const [is2faModalOpen, setIs2faModalOpen] = useState(false);
+  const [setup2faData, setSetup2faData] = useState<{
+    secret: string;
+    qrUri: string;
+    qrImageUrl: string;
+    recoveryCodes: string[];
+  } | null>(null);
+  const [otpVerifyCode, setOtpVerifyCode] = useState("");
+  const [enabling2fa, setEnabling2fa] = useState(false);
+  const [isDisableModalOpen, setIsDisableModalOpen] = useState(false);
+  const [disablePassword, setDisablePassword] = useState("");
+  const [disabling2fa, setDisabling2fa] = useState(false);
+
+  // Inactivity Auto Logout (30 minutes)
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const resetInactivityTimer = () => {
+      clearTimeout(timeoutId);
+      // 30 minutes
+      timeoutId = setTimeout(async () => {
+        alert("Phiên đăng nhập đã hết hạn do không có thao tác trong 30 phút.");
+        await fetch("/api/auth/logout", { method: "POST" });
+        window.location.href = "/admin/login";
+      }, 30 * 60 * 1000);
+    };
+
+    const events = ["mousedown", "mousemove", "keypress", "scroll", "touchstart", "click"];
+    events.forEach((evt) => window.addEventListener(evt, resetInactivityTimer));
+    resetInactivityTimer();
+
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach((evt) => window.removeEventListener(evt, resetInactivityTimer));
+    };
+  }, []);
+
+  const fetch2faStatus = async () => {
+    try {
+      const res = await fetch("/api/auth/2fa");
+      if (res.status === 401 || res.status === 404 || !res.ok) return handleAuthError();
+      const json = await res.json();
+      if (json.success) {
+        setIs2faEnabled(json.enabled);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleStartSetup2fa = async () => {
+    setLoading2fa(true);
+    try {
+      const res = await fetch("/api/auth/2fa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "setup" })
+      });
+      if (res.status === 401 || res.status === 404 || !res.ok) return handleAuthError();
+      const data = await res.json();
+      if (data.success) {
+        setSetup2faData(data);
+        setOtpVerifyCode("");
+        setIs2faModalOpen(true);
+      } else {
+        alert("Không thể khởi tạo 2FA");
+      }
+    } catch (err) {
+      alert("Lỗi kết nối máy chủ");
+    } finally {
+      setLoading2fa(false);
+    }
+  };
+
+  const handleConfirmEnable2fa = async () => {
+    if (!setup2faData || !otpVerifyCode) return alert("Vui lòng nhập mã OTP 6 chữ số");
+    setEnabling2fa(true);
+    try {
+      const res = await fetch("/api/auth/2fa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "enable",
+          secret: setup2faData.secret,
+          token: otpVerifyCode,
+          recoveryCodes: setup2faData.recoveryCodes
+        })
+      });
+      if (res.status === 401 || res.status === 404 || !res.ok) return handleAuthError();
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        setIs2faEnabled(true);
+        setIs2faModalOpen(false);
+      } else {
+        alert(data.error || "Mã OTP không chính xác");
+      }
+    } catch (err) {
+      alert("Lỗi kết nối máy chủ");
+    } finally {
+      setEnabling2fa(false);
+    }
+  };
+
+  const handleConfirmDisable2fa = async () => {
+    if (!disablePassword) return alert("Vui lòng nhập mật khẩu quản trị để xác nhận");
+    setDisabling2fa(true);
+    try {
+      const res = await fetch("/api/auth/2fa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "disable",
+          password: disablePassword
+        })
+      });
+      if (res.status === 401 || res.status === 404 || !res.ok) return handleAuthError();
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        setIs2faEnabled(false);
+        setIsDisableModalOpen(false);
+        setDisablePassword("");
+      } else {
+        alert(data.error || "Mật khẩu không chính xác");
+      }
+    } catch (err) {
+      alert("Lỗi kết nối máy chủ");
+    } finally {
+      setDisabling2fa(false);
+    }
+  };
+
   useEffect(() => {
     fetchInvoices();
     fetchSettings();
     fetchZaloSettings();
     fetchZaloLogs();
+    fetch2faStatus();
 
     // Auto refresh every 10 seconds to feel live
     const interval = setInterval(fetchInvoices, 10000);
@@ -836,6 +973,52 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
+                {/* 2FA Section */}
+                <div className="pt-4 border-t border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="material-symbols-outlined text-blue-600 text-lg">phonelink_lock</span>
+                      <h4 className="text-sm font-bold text-slate-800">
+                        Xác thực 2 bước (2FA - Google Authenticator)
+                      </h4>
+                      {is2faEnabled ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> Đang bật
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600">
+                          Chưa kích hoạt
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500 max-w-xl">
+                      {is2faEnabled
+                        ? "Tài khoản của bạn đang được bảo vệ bởi lớp xác thực OTP 6 số. Cần có điện thoại mới đăng nhập được."
+                        : "Yêu cầu nhập thêm mã OTP từ ứng dụng Google Authenticator / Authy mỗi khi đăng nhập, chống đánh cắp tài khoản 100%."}
+                    </p>
+                  </div>
+                  <div>
+                    {is2faEnabled ? (
+                      <button
+                        onClick={() => setIsDisableModalOpen(true)}
+                        className="px-5 py-2.5 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-xl text-sm font-bold transition-all flex items-center gap-1.5"
+                      >
+                        <span className="material-symbols-outlined text-base">lock_open</span>
+                        Tắt 2FA
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleStartSetup2fa}
+                        disabled={loading2fa}
+                        className="px-5 py-2.5 bg-blue-600 text-white hover:bg-blue-700 shadow-sm rounded-xl text-sm font-bold transition-all flex items-center gap-1.5 disabled:opacity-50"
+                      >
+                        <span className="material-symbols-outlined text-base">qr_code_scanner</span>
+                        {loading2fa ? "Đang tạo..." : "Kích hoạt 2FA ngay"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 <div className="pt-4 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                   <div>
                     <h4 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
@@ -1151,6 +1334,127 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+      {/* 2FA Setup Modal */}
+      {is2faModalOpen && setup2faData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 flex flex-col items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+              <span className="material-symbols-outlined text-2xl">qr_code_2</span>
+            </div>
+            <div className="text-center">
+              <h3 className="font-headline font-bold text-xl text-slate-800">Thiết lập Xác thực 2 bước (2FA)</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Dùng ứng dụng <b>Google Authenticator</b> trên điện thoại để quét mã QR bên dưới:
+              </p>
+            </div>
+
+            {/* QR Code Image */}
+            <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={setup2faData.qrImageUrl} alt="2FA QR Code" className="w-[180px] h-[180px] object-contain" />
+            </div>
+
+            {/* Secret key fallback */}
+            <div className="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+              <span className="text-xs text-slate-400 block mb-1">Mã khóa dự phòng (nhập thủ công nếu không quét được):</span>
+              <div className="flex items-center justify-center gap-2">
+                <code className="text-xs font-mono font-bold text-slate-700 select-all">{setup2faData.secret}</code>
+                <button
+                  onClick={() => handleCopy(setup2faData.secret, '2fa_secret')}
+                  className="text-xs text-blue-600 font-bold hover:underline"
+                >
+                  {copiedId === '2fa_secret' ? 'Đã sao chép!' : 'Sao chép'}
+                </button>
+              </div>
+            </div>
+
+            {/* Recovery Codes */}
+            <div className="w-full bg-amber-50/70 p-3 rounded-xl border border-amber-200/60">
+              <span className="text-xs font-bold text-amber-800 block mb-1">🔑 Mã khôi phục khẩn cấp (Lưu lại đề phòng mất máy):</span>
+              <div className="grid grid-cols-2 gap-1 text-xs font-mono text-amber-900">
+                {setup2faData.recoveryCodes.map((code, idx) => (
+                  <span key={idx} className="bg-white/80 px-2 py-0.5 rounded border border-amber-100">{code}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Verification Code Input */}
+            <div className="w-full">
+              <label className="block text-xs font-bold text-slate-700 mb-1">Nhập mã OTP 6 số để kích hoạt:</label>
+              <input
+                type="text"
+                maxLength={6}
+                value={otpVerifyCode}
+                onChange={(e) => setOtpVerifyCode(e.target.value)}
+                placeholder="123456"
+                className="w-full p-3 bg-white border border-blue-400 rounded-xl text-center font-mono font-bold text-lg tracking-widest outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex gap-3 w-full mt-1">
+              <button
+                onClick={() => setIs2faModalOpen(false)}
+                disabled={enabling2fa}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all text-sm"
+              >
+                Đóng
+              </button>
+              <button
+                onClick={handleConfirmEnable2fa}
+                disabled={enabling2fa || otpVerifyCode.length !== 6}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all disabled:opacity-50 text-sm shadow-sm"
+              >
+                {enabling2fa ? "Đang xác nhận..." : "Xác nhận & Bật"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2FA Disable Modal */}
+      {isDisableModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 flex flex-col items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
+              <span className="material-symbols-outlined text-2xl">lock_open</span>
+            </div>
+            <div className="text-center">
+              <h3 className="font-headline font-bold text-lg text-slate-800">Xác nhận Tắt 2FA</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Vui lòng nhập mật khẩu Quản trị viên để xác nhận tắt lớp bảo vệ 2FA:
+              </p>
+            </div>
+
+            <div className="w-full">
+              <input
+                type="password"
+                value={disablePassword}
+                onChange={(e) => setDisablePassword(e.target.value)}
+                placeholder="Mật khẩu Admin..."
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
+              />
+            </div>
+
+            <div className="flex gap-3 w-full mt-1">
+              <button
+                onClick={() => { setIsDisableModalOpen(false); setDisablePassword(""); }}
+                disabled={disabling2fa}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all text-sm"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleConfirmDisable2fa}
+                disabled={disabling2fa || !disablePassword}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700 transition-all disabled:opacity-50 text-sm shadow-sm"
+              >
+                {disabling2fa ? "Đang tắt..." : "Tắt 2FA"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
+
