@@ -6,18 +6,13 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAuthed = await verifyAdminSessionFast(request);
 
-  // 1. Protect /admin UI pages (redirect unauthenticated to /admin/login)
+  // 1. Protect /admin UI pages: Redirect unauthenticated requests (missing/forged token) to /admin/login
   if (pathname.startsWith('/admin')) {
     const isLoginPage = pathname === '/admin/login';
 
     if (!isAuthed && !isLoginPage) {
       const loginUrl = new URL('/admin/login', request.url);
       return NextResponse.redirect(loginUrl);
-    }
-
-    if (isAuthed && isLoginPage) {
-      const adminUrl = new URL('/admin', request.url);
-      return NextResponse.redirect(adminUrl);
     }
   }
 
